@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { createWebhookDelivery } from "../webhooks/delivery-repository.js";
 import { verifyGitHubSignature } from "../webhooks/signature-verifier.js";
+import { webhookDeliveryQueue } from "../queue/webhook-delivery-queue.js";
 
 type GitHubWebhookRequest = { 
     Headers: { 
@@ -58,6 +59,25 @@ export const githubWebhooksRoutes: FastifyPluginAsync = async (app) => {
                 eventName: request.headers["x-github-event"],
                 payload,
             });
+
+            if (delivery != null) { 
+                await webhookDeliveryQueue.add(
+                    "process-webhook-delivery",
+                    {
+                        deliveryId: request.headers["x-github-delivery"],
+                    },
+                    {
+                        jobId: `delivery-${request.headers["x-github-delivery"]}`,
+                        attempts: 5,
+                        backoff: { 
+                            type: "exponential",
+                            delay: 1000,
+                        },
+                        removeOnComplete: 1000,
+                        removeOnFail: 1000,
+                    }
+                );
+            }
 
             if (delivery == null) { 
                 return reply.code(200).send({
