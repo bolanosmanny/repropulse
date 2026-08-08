@@ -7,6 +7,14 @@ export function buildApp() {
     logger: true,
   });
 
+  app.addContentTypeParser(
+    "application/json",
+    { parseAs: "string" },
+    (_request, body, done) => {
+      done(null, body);
+    }
+  );
+
   app.register(healthRoutes);
   app.register(githubWebhooksRoutes);
 
