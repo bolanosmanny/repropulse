@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "tst src/server.ts",
+    "start": "tsx src/server.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
@@ -15,7 +15,7 @@
   "license": "ISC",
   "description": "",
   "type": "module",
-  "private": "true",
+  "private": true,
   "dependencies": {
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",

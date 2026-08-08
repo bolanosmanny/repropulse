@@ -1,31 +1,14 @@
 import Fastify from "fastify";
+import { githubWebhooksRoutes } from "./routes/github-webhooks.js";
+import { healthRoutes } from "./routes/health.js";
 
-export function buildApp() { 
-    const app = Fastify({
-        logger: true,
-    });
+export function buildApp() {
+  const app = Fastify({
+    logger: true,
+  });
 
-    app.get(
-        "/health",
-        {
-            schema: { 
-                response: {
-                    200: {
-                        type: "object",
-                        properties: {
-                            service: { type: "string" },
-                            status: { type: "string" },
-                        },
-                        required: ["service", "status"],
-                    }
-                }
-            }
-        },
-        async () => ({
-            service: "repropulse",
-            status: "ok",
-        })
-    );
+  app.register(healthRoutes);
+  app.register(githubWebhooksRoutes);
 
-    return app;
+  return app;
 }
