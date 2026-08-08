@@ -6,6 +6,8 @@ import {
 } from "../webhooks/delivery-repository.js";
 import { redisConnection } from "../queue/redis-connection.js";
 import type { ProcessWebhookDeliveryJob } from "../queue/webhook-delivery-queue.js";
+import { parseWorkflowRunWebhookPayload } from "../workflows/workflow-run-payload.js";
+import { upsertWorkflowRun } from "../workflows/workflow-run-repository.js";
 
 const logger = pino({
     name: "webhook-delivery-worker",
@@ -30,7 +32,27 @@ const worker = new Worker<ProcessWebhookDeliveryJob>(
             return;
         }
 
-        // Future step: dispatch workflow events and process test results here.
+        if (delivery.eventName === "workflow_run") { 
+            const payload = parseWorkflowRunWebhookPayload(delivery.payload);
+
+            const workflowRun = await upsertWorkflowRun(payload);
+
+            logger.info(
+                {
+                    deliveryId: delivery.deliveryId,
+                    githubWorkflowRunId: workflowRun.githubWorkflowRunId,
+                },
+                "Workflow run stored"
+            );
+        } else { 
+            logger.info(
+                {
+                    deliveryId: delivery.deliveryId,
+                    eventName: delivery.eventName,
+                },
+                "Ignoring unsupported webhook event type"
+            );
+        }
 
 
         logger.info(
