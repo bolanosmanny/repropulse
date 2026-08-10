@@ -7,6 +7,7 @@ const environmentSchema = z.object({
     DATABASE_URL: z.string().url(),
     REDIS_URL: z.string().url(),
     GITHUB_WEBHOOK_SECRET: z.string().min(32),
+    REPROPULSE_INGESTION_TOKEN: z.string().min(32),
 });
 
 export const env = environmentSchema.parse(process.env);

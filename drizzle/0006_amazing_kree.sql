@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "test_executions_run_test_unique" ON "test_executions" USING btree ("workflow_run_id","test_definition_id");

@@ -9,7 +9,8 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "worker:dev": "tsx watch src/workers/webhook-delivery-worker.ts"
+    "worker:dev": "tsx watch src/workers/webhook-delivery-worker.ts",
+    "worker:test-reports": "tsx watch src/workers/test-report-worker.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +23,7 @@
     "bullmq": "^6.0.9",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
+    "fast-xml-parser": "^5.10.1",
     "fastify": "^5.11.2",
     "ioredis": "^6.0.0",
     "pg": "^8.22.0",
