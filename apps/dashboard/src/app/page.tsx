@@ -1,42 +1,6 @@
-const kpis = [
-  ["Tests monitored", "3", "Across 1 active repository"],
-  ["CI runs ingested", "2", "Same commit rerun detected"],
-  ["High-risks tests", "1", "Needs investigation this week"],
-  ["Transient failures", "1", "Recovered on a rerun"],
-  ["Reliability confidence", "50%", "Based on observed retry behavior"],
-];
+import { getDashboardData } from "@/lib/repropulse-api";
 
-const recentRuns = [
-  ["Test Suite", "main", "Attempt 2", "Passed", "2m 00s"],
-  ["Test Suite", "main", "Attempt 1", "Passed", "2m 30s"],
-];
-
-const riskRows = [
-  [
-    "rejects expired token",
-    "auth.tokens",
-    "50%",
-    "Failed → Passed",
-    "Review shared test state",
-    "High",
-  ],
-  [
-    "accepts valid token",
-    "auth.tokens",
-    "0%",
-    "Stable",
-    "Continue Monitoring",
-    "Low",
-  ],
-  [
-    "skips provider check",
-    "auth.tokens",
-    "0%",
-    "Skipped",
-    "Add coverage when available",
-    "Low",
-  ],
-];
+export const dynamic = "force-dynamic";
 
 function NavRow({
   label,
@@ -104,7 +68,63 @@ function StatusPill({
   );
 }
 
-export default function Home() { 
+export default async function Home() { 
+
+  const { scores, workflowRuns } = await getDashboardData(1);
+
+  const highestFlakeScore = Math.max(
+    0,
+    ...scores.map((score) => score.flakeScore.scorePercent)
+  );
+
+  const kpis = [
+    ["Test monitored", String(scores.length), "Across 1 active repository"],
+    ["CI runs ingested", String(workflowRuns.length), "Workflow attempts stored"],
+    [
+      "High-risk tests",
+      String(scores.filter((score) => score.flakeScore.scorePercent >= 25).length),
+      "Tests scoring 25% or higher",
+    ],
+    [
+      "Transient failures",
+      String(
+        scores.reduce(
+          (total, score) => total + score.flakeScore.transientFailures,
+          0
+        )
+      ),
+      "Recovered on a later rerun",
+    ],
+    [
+      "Highest flake score",
+      `${highestFlakeScore}%`,
+      "Highest observed retry risk",
+    ],
+  ];
+
+  const riskRows = scores.slice(0, 5).map((score) => [
+    score.testName,
+    score.className || score.suiteName,
+    `${score.flakeScore.scorePercent}%`,
+    score.flakeScore.transientFailures > 0
+      ? "Failed → passed on rerun"
+      : "No transient failure",
+    score.flakeScore.transientFailures > 0
+      ? "Review shared test state"
+      : "Continue monitoring",
+    score.flakeScore.scorePercent >= 25 ? "High" : "Low",
+  ]);
+  
+  const recentRuns = workflowRuns.slice(0, 5).map((workflowRun) => [
+    workflowRun.workflowName,
+    workflowRun.headBranch ?? "unknown branch",
+    `Attempt ${workflowRun.runAttempt}`,
+    workflowRun.conclusion ?? workflowRun.status,
+    workflowRun.completedAt
+      ? new Date(workflowRun.completedAt).toLocaleDateString()
+      : "In Progress",
+  ]);
+  
   return (
     <main className = "min-h-screen bg-stone-100 lg:flex">
       <aside className = "hidden w-60 shrink-0 border-r border-stone-200 bg-stone-50 p-3 lg:flex lg:flex-col">
