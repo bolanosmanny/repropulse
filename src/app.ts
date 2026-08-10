@@ -3,6 +3,7 @@ import { githubWebhooksRoutes } from "./routes/github-webhooks.js";
 import { healthRoutes } from "./routes/health.js";
 import { testReportRoutes } from "./routes/test-reports.js";
 import { flakeScoreRoutes } from "./routes/flake-scores.js";
+import { workflowRunRoutes } from "./routes/workflow-runs.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -37,6 +38,7 @@ export function buildApp() {
   app.register(githubWebhooksRoutes);
   app.register(testReportRoutes);
   app.register(flakeScoreRoutes);
+  app.register(workflowRunRoutes);
 
   return app;
 }

@@ -1,6 +1,7 @@
 import { db } from "../db/client.js";
 import { repositories, workflowRuns } from "../db/schema.js";
 import type { WorkflowRunWebhookPayload } from "./workflow-run-payload.js";
+import { desc, eq } from "drizzle-orm";
 
 export async function upsertWorkflowRun(
     payload: WorkflowRunWebhookPayload
@@ -66,4 +67,25 @@ export async function upsertWorkflowRun(
     }
 
     return savedWorkflowRun;
+}
+
+export async function listWorkflowRunsForRepository(
+    repositoryId: number,
+) { 
+    return db   
+        .select({
+            githubWorkflowRunId: workflowRuns.githubWorkflowRunId,
+            workflowName: workflowRuns.workflowName,
+            status: workflowRuns.status,
+            conclusion: workflowRuns.conclusion,
+            headSha: workflowRuns.headSha,
+            headBranch: workflowRuns.headBranch,
+            runAttempt: workflowRuns.runAttempt,
+            startedAt: workflowRuns.startedAt,
+            completedAt: workflowRuns.completedAt,
+        })
+        .from(workflowRuns)
+        .where(eq(workflowRuns.repositoryId, repositoryId))
+        .orderBy(desc(workflowRuns.completedAt))
+        .limit(20);
 }
