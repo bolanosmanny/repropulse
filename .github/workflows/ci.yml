@@ -30,7 +30,7 @@ jobs:
               run: npm test -- --reporter=junit --outputFile=reports/junit.xml
 
             - name: Upload JUnit report to ReproPulse
-              if: always()
+              if: always() && vars.REPROPULSE_ENDPOINT != ''
               uses: ./actions/upload-junit
               with:
                 endpoint: ${{ vars.REPROPULSE_ENDPOINT }}
