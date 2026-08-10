@@ -1,4 +1,5 @@
 import { getDashboardData } from "@/lib/repropulse-api";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -145,7 +146,13 @@ export default async function Home() {
           <NavRow label = "Dashboard" active />
           <NavRow label = "Repositories" />
           <NavRow label = "Test Explorer" />
-          <NavRow label = "Workflow Runs" />
+          <Link
+            href = "/workflows"
+            className = "flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-sm text-stone-600 hover:bg-stone-100"
+          >
+            <span className = "h-1.5 w-1.5 rounded-full bg-stone-400" />
+            Workflow Runs
+          </Link>
           <NavRow label = "Risk Queue" />
         </div>
 
@@ -232,13 +239,16 @@ export default async function Home() {
               <button className = "rounded-lg border border-stone 200 bg-white px-3 py-1.5 text-sm font-medium">
                 Overview
               </button>
-              <button className = " rounded-lg px-3 py-1.5 text-sm text-stone-500">
+              <button className = "rounded-lg px-3 py-1.5 text-sm text-stone-500">
                 Flake Scores
               </button>
-              <button className = " rounded-lg px-3 py-1.5 text-sm text-stone-500">
+              <Link
+                href = "/workflows"
+                className = "rounded-lg px-3 py-1.5 text-sm text-stone-500"
+              >
                 Workflow Runs
-              </button>
-              <button className = " rounded-lg px-3 py-1.5 text-sm text-stone-500">
+              </Link>
+              <button className = "rounded-lg px-3 py-1.5 text-sm text-stone-500">
                 Test History
               </button>
             </div>
