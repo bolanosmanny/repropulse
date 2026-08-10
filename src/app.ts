@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import { githubWebhooksRoutes } from "./routes/github-webhooks.js";
 import { healthRoutes } from "./routes/health.js";
 import { testReportRoutes } from "./routes/test-reports.js";
+import { flakeScoreRoutes } from "./routes/flake-scores.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -35,6 +36,7 @@ export function buildApp() {
   app.register(healthRoutes);
   app.register(githubWebhooksRoutes);
   app.register(testReportRoutes);
+  app.register(flakeScoreRoutes);
 
   return app;
 }
