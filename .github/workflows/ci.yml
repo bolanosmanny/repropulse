@@ -13,6 +13,38 @@ jobs:
         name: Test and upload results
         runs-on: ubuntu-latest
 
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://repropulse:repropulse@localhost:5432/repropulse_test
+          REDIS_URL: redis://localhost:6379
+          GITHUB_WEBHOOK_SECRET: ci-webhook-secret-must-be-at-least-32-characters
+          REPROPULSE_INGESTION_TOKEN: ci-ingestion-token-must-be-at-least-32-characters
+
+        services:
+          postgres:
+              image: postgres:16-alpine
+              env:
+                POSTGRES_USER: repropulse
+                POSTGRES_PASSWORD: repropulse
+                POSTGRES_DB: repropulse_test
+              ports:
+                - 5432:5432
+              options: >-
+                --health-cmd "pg_isready -U repropulse -d repropulse_test"
+                --health-interval 10s
+                --health-timeout 5s
+                --health-retries 5
+
+          redis:
+            image: redis:7-alpine
+            ports:
+              - 6379:6379
+            options: >-
+              --health-cmd "redis-cli ping"
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+
         steps:
             - name: Check out repository
               uses: actions/checkout@v4
@@ -25,6 +57,9 @@ jobs:
 
             - name: Install dependencies
               run: npm ci
+
+            - name: Run database migrations
+              run: npm run db:migrate
 
             - name: Run test suite
               run: npm test -- --reporter=default --reporter=junit --outputFile=reports/junit.xml
