@@ -27,7 +27,7 @@ jobs:
               run: npm ci
 
             - name: Run test suite
-              run: npm test -- --reporter=junit --outputFile=reports/junit.xml
+              run: npm test -- --reporter=default --reporter=junit --outputFile=reports/junit.xml
 
             - name: Upload JUnit report to ReproPulse
               if: always() && vars.REPROPULSE_ENDPOINT != ''
