@@ -160,7 +160,13 @@ export default async function Home() {
           <p className = "px-3 text-[10px] font-medium uppercase tracking-[0.12em] text-stone-400">
             Insight & Control
           </p>
-          <NavRow label = "Flake Scores" />
+          <Link
+            href = "/flake-scores"
+            className = "flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-sm text-stone-600 hover:bg-stone-100"
+          >
+            <span className = "h-1.5 w-1.5 rounded-full bg-stone-400" />
+            Flake Scores
+          </Link>
           <NavRow label = "Failure Trends" />
           <NavRow label = "Ingestion Jobs" />
           <NavRow label = "Settings" />
@@ -239,9 +245,12 @@ export default async function Home() {
               <button className = "rounded-lg border border-stone 200 bg-white px-3 py-1.5 text-sm font-medium">
                 Overview
               </button>
-              <button className = "rounded-lg px-3 py-1.5 text-sm text-stone-500">
+              <Link
+                href="/flake-scores"
+                className="rounded-lg px-3 py-1.5 text-sm text-stone-500"
+              >
                 Flake Scores
-              </button>
+              </Link>
               <Link
                 href = "/workflows"
                 className = "rounded-lg px-3 py-1.5 text-sm text-stone-500"
