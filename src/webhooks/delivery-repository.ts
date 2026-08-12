@@ -43,3 +43,12 @@ export async function markWebhookDeliveryProcessed(deliveryId: string) {
         })
         .where(eq(webhookDeliveries.deliveryId, deliveryId));
 }
+
+export async function markWebhookDeliveryFailed(deliveryId: string) { 
+    await db
+        .update(webhookDeliveries)
+        .set({
+            status: "failed", 
+        })
+        .where(eq(webhookDeliveries.deliveryId, deliveryId));
+}

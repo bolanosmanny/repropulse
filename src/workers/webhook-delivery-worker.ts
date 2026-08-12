@@ -3,6 +3,7 @@ import pino from "pino";
 import { 
     findWebhookDeliveryByDeliveryId,
     markWebhookDeliveryProcessed,
+    markWebhookDeliveryFailed,
 } from "../webhooks/delivery-repository.js";
 import { redisConnection } from "../queue/redis-connection.js";
 import type { ProcessWebhookDeliveryJob } from "../queue/webhook-delivery-queue.js";
@@ -89,6 +90,13 @@ worker.on("failed", (job, error) => {
     if (job == null || job.attemptsMade < (job.opts.attempts ?? 1)) { 
         return;
     }
+    
+    void markWebhookDeliveryFailed(job.data.deliveryId).catch((statusError) => { 
+        logger.error(
+            { deliveryId: job.data.deliveryId, err: statusError },
+            "Failed to mark webhook delivery as failed"
+        );
+    });
 
     void deadLetterQueue
         .add(

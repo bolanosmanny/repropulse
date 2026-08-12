@@ -1,4 +1,7 @@
-import { getDashboardData } from "@/lib/repropulse-api";
+import { 
+  getDashboardData,
+  getReliabilityMetrics,
+ } from "@/lib/repropulse-api";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -71,35 +74,36 @@ function StatusPill({
 
 export default async function Home() { 
 
-  const { scores, workflowRuns } = await getDashboardData(1);
-
-  const highestFlakeScore = Math.max(
-    0,
-    ...scores.map((score) => score.flakeScore.scorePercent)
-  );
-
+  const [{ scores, workflowRuns }, metrics] = await Promise.all([
+    getDashboardData(1),
+    getReliabilityMetrics(1),
+  ]);
+  
   const kpis = [
-    ["Test monitored", String(scores.length), "Across 1 active repository"],
-    ["CI runs ingested", String(workflowRuns.length), "Workflow attempts stored"],
+    ["Tests monitored", String(scores.length), "Unique test definitions"],
     [
-      "High-risk tests",
-      String(scores.filter((score) => score.flakeScore.scorePercent >= 25).length),
-      "Tests scoring 25% or higher",
+      "Workflow runs",
+      String(metrics.workflowRunCount),
+      "Workflow attempts processed",
     ],
     [
-      "Transient failures",
-      String(
-        scores.reduce(
-          (total, score) => total + score.flakeScore.transientFailures,
-          0
-        )
-      ),
-      "Recovered on a later rerun",
+      "Test executions",
+      String(metrics.testExecutionsStored),
+      "JUnit results stored",
     ],
     [
-      "Highest flake score",
-      `${highestFlakeScore}%`,
-      "Highest observed retry risk",
+      "Flaky tests",
+      String(metrics.flakyTestsDetected),
+      "Recovered on the same commit",
+    ],
+    [
+      "Webhook success",
+      metrics.webhookProcessing.successRatePercent == null
+        ? "—"
+        : `${metrics.webhookProcessing.successRatePercent}%`,
+      metrics.webhookProcessing.p95LatencyMs == null
+        ? "No completed deliveries yet"
+        : `p95: ${metrics.webhookProcessing.p95LatencyMs.toFixed(1)} ms`,
     ],
   ];
 

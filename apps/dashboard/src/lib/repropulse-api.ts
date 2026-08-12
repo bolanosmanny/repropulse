@@ -74,6 +74,19 @@ export type DeadLetterJob = {
     failedAt: string;
 }
 
+export type ReliabilityMetrics = {
+    repositoryId: number;
+    workflowRunCount: number;
+    testExecutionsStored: number;
+    flakyTestsDetected: number;
+    webhookProcessing: {
+        processed: number;
+        failed: number;
+        successRatePercent: number | null;
+        p95LatencyMs: number | null;
+    };
+};
+
 const apiBaseUrl = 
     process.env.REPROPULSE_API_URL ?? "http://localhost:3001";
 
@@ -119,4 +132,10 @@ export async function getIngestionQueueStatus() {
         queues: IngestionQueueStatus[];
         deadLetterJobs: DeadLetterJob[];   
     }>("/api/v1/operations/ingestion-jobs");
+}
+
+export async function getReliabilityMetrics(repositoryId: number) {
+    return getJson<ReliabilityMetrics>(
+        `/api/v1/repositories/${repositoryId}/reliability-metrics`
+    );
 }
