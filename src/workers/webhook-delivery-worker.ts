@@ -8,6 +8,7 @@ import { redisConnection } from "../queue/redis-connection.js";
 import type { ProcessWebhookDeliveryJob } from "../queue/webhook-delivery-queue.js";
 import { parseWorkflowRunWebhookPayload } from "../workflows/workflow-run-payload.js";
 import { upsertWorkflowRun } from "../workflows/workflow-run-repository.js";
+import { deadLetterQueue } from "../queue/dead-letter-queue.js";
 
 const logger = pino({
     name: "webhook-delivery-worker",
@@ -84,4 +85,30 @@ worker.on("failed", (job, error) => {
         },
         "Webhook delivery job failed"
     );
+
+    if (job == null || job.attemptsMade < (job.opts.attempts ?? 1)) { 
+        return;
+    }
+
+    void deadLetterQueue
+        .add(
+            "webhook-deliveries-failed",
+            {
+                sourceQueue: "webhook-deliveries",
+                sourceJobId: job.id,
+                jobName: job.name,
+                attemptsMade: job.attemptsMade,
+                failedReason: error.message,
+                failedAt: new Date().toISOString(),
+            },
+            {
+                jobId: `dead-letter-webhook-${job.id}`,
+            }
+        )
+        .catch((deadLetterError) => { 
+            logger.error(
+                { jobId: job.id, err: deadLetterError },
+                "Failed to record dead-letter job"
+            );
+        });
 });

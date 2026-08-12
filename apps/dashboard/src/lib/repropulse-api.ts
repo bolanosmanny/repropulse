@@ -64,6 +64,16 @@ export type IngestionQueueStatus = {
     failedJobs: FailedQueueJob[];
 };
 
+export type DeadLetterJob = {
+    id: string | undefined;
+    sourceQueue: "webhook-deliveries" | "test-report-ingestion";
+    sourceJobId: string | undefined;
+    jobName: string;
+    attemptsMade: number;
+    failedReason: string;
+    failedAt: string;
+}
+
 const apiBaseUrl = 
     process.env.REPROPULSE_API_URL ?? "http://localhost:3001";
 
@@ -105,9 +115,8 @@ export async function getTestExecutions(repositoryId: number) {
 }
 
 export async function getIngestionQueueStatus() { 
-    const response = await getJson<{
-        queues: IngestionQueueStatus[];  
+    return getJson<{
+        queues: IngestionQueueStatus[];
+        deadLetterJobs: DeadLetterJob[];   
     }>("/api/v1/operations/ingestion-jobs");
-
-    return response.queues;
 }

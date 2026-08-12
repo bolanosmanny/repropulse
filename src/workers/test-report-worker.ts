@@ -4,6 +4,7 @@ import { redisConnection } from "../queue/redis-connection.js";
 import type { ProcessTestReportJob } from "../queue/test-report-queue.js";
 import { parseJUnitXml } from "../ingestion/junit-parser.js";
 import { storeTestReport } from "../ingestion/test-report-repository.js";
+import { deadLetterQueue } from "../queue/dead-letter-queue.js";
 
 const logger = pino({
     name: "test-report-worker",
@@ -48,4 +49,30 @@ worker.on("failed", (job, error) => {
         },
         "Test report job failed"
     );
+
+    if (job == null || job.attemptsMade < (job.opts.attempts ?? 1)) { 
+        return;
+    }
+
+    void deadLetterQueue
+        .add(
+            "test-report-failed",
+            {
+                sourceQueue: "test-report-ingestion",
+                sourceJobId: job.id,
+                jobName: job.name,
+                attemptsMade: job.attemptsMade,
+                failedReason: error.message,
+                failedAt: new Date().toISOString(),
+            },
+            {
+                jobId: `dead-letter-test-report-${job.id}`,
+            }
+        )
+        .catch((deadLetterError) => { 
+            logger.error(
+                { jobId: job.id, err: deadLetterError },
+                "Failed ot record dead-letter job"
+            );
+        });
 });

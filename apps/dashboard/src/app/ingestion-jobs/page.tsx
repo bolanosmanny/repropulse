@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 function queueLabel(queueName: string) { 
     if (queueName === "webhook-deliveries") { 
-        return "Github webhook deliveries";
+        return "GitHub webhook deliveries";
     }
 
     if (queueName === "test-report-ingestion") { 
@@ -16,7 +16,7 @@ function queueLabel(queueName: string) {
 }
 
 export default async function IngestionJobsPage() { 
-    const queues = await getIngestionQueueStatus();
+    const { queues, deadLetterJobs } = await getIngestionQueueStatus();
 
     const totalWaiting = queues.reduce(
         (total, queue) => total + queue.counts.waiting,
@@ -28,21 +28,11 @@ export default async function IngestionJobsPage() {
         0
     );
 
-    const totalFailed = queues.reduce(
-        (total, queue) => total + queue.counts.failed,
-        0
-    );
+    const totalFailed = deadLetterJobs.length;
 
     const totalCompleted = queues.reduce(
         (total, queue) => total + queue.counts.completed,
         0
-    );
-
-    const failedJobs = queues.flatMap((queue) =>
-        queue.failedJobs.map((job) => ({
-            ...job,
-            queueName: queue.queueName,
-        }))
     );
 
     return ( 
@@ -64,14 +54,14 @@ export default async function IngestionJobsPage() {
                 <div>
                     <h1 className = "text-xl font-medium tracking-tight">Ingestion Jobs</h1>
                     <p className = "mt-1 max-w-3xl text-sm text-stone-600">
-                        Monitor the backgroudn queues that process Github webhooks an JUnit test reports. Jobs retry up to five times with exponential backoff.
+                        Monitor the background queues that process GitHub webhooks and JUnit test reports. Jobs retry up to five times with exponential backoff.
                     </p>
                 </div>
 
                 <section className = "mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                         ["Waiting", String(totalWaiting), "Queued for a worker"],
-                        ["Active", String(totalActive), "Currentl Processing"],
+                        ["Active", String(totalActive), "Currently Processing"],
                         ["Completed Retained", String(totalCompleted), "Recent Successful Jobs"],
                         ["Terminal Failures", String(totalFailed), "Failed after all retries"],
                     ].map(([label, value, helper]) => (
@@ -162,10 +152,10 @@ export default async function IngestionJobsPage() {
                             </thead>
 
                             <tbody className = "divide-y divide-stone-100">
-                                {failedJobs.map((job) => (
-                                    <tr key = {`${job.queueName}-${job.id}`}>
+                                {deadLetterJobs.map((job) => (
+                                    <tr key = {`${job.sourceQueue}-${job.id}`}>
                                         <td className = "px-4 py-3 text-stone-600">
-                                            {queueLabel(job.queueName)}
+                                            {queueLabel(job.sourceQueue)}
                                         </td>
                                         <td className = "px-4 py-3 font-mono text-xs text-stone-600">
                                             {job.id ?? "Unknown ID"}
@@ -177,15 +167,15 @@ export default async function IngestionJobsPage() {
                                             {job.failedReason ?? "Unknown Failure"}
                                         </td>
                                         <td className = "px-4 py-3 text-stone-600">
-                                            {new Date(job.timestamp).toLocaleString()}
+                                            {new Date(job.failedAt).toLocaleString()}
                                         </td>
                                     </tr>
                                 ))}
 
-                                {failedJobs.length === 0 ? (
+                                {deadLetterJobs.length === 0 ? (
                                     <tr>
                                         <td colSpan = {5} className = "px-4 py-10 text-center text-stone-500">
-                                            No terminal failures. Both ingested queues are healthy.
+                                            No terminal failures. Both ingestion queues are healthy.
                                         </td>
                                     </tr>
                                 ) : null}
@@ -197,3 +187,4 @@ export default async function IngestionJobsPage() {
         </main>
     );
 }
+

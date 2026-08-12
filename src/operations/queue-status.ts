@@ -1,6 +1,10 @@
 import type { Queue } from "bullmq";
 import { testReportQueue } from "../queue/test-report-queue.js";
 import { webhookDeliveryQueue } from "../queue/webhook-delivery-queue.js";
+import {
+    deadLetterQueue,
+    type DeadLetterJob,
+} from "../queue/dead-letter-queue.js"
 
 type QueueStatus = { 
     queueName: string;
@@ -19,6 +23,10 @@ type QueueStatus = {
         timestamp: number;
     }[];
 };
+
+type DeadLetterRecord = DeadLetterJob & {
+    id: string | undefined;
+}
 
 async function getQueueStatus(queue: Queue): Promise<QueueStatus> { 
     const counts = await queue.getJobCounts(
@@ -50,11 +58,26 @@ async function getQueueStatus(queue: Queue): Promise<QueueStatus> {
     };
 }
 
-export async function getIngesetionQueueStatus() { 
-    const queues = await Promise.all([
-        getQueueStatus(webhookDeliveryQueue),
-        getQueueStatus(testReportQueue),
+async function getDeadLetterJobs(): Promise<DeadLetterRecord[]> { 
+    const jobs = await deadLetterQueue.getJobs(["waiting"],0,9);
+
+    return jobs.map((job) => ({
+        id: job.id,
+        ...job.data,
+    }));
+}
+
+export async function getIngestionQueueStatus() { 
+    const [queues, deadLetterJobs] = await Promise.all([
+        Promise.all([
+            getQueueStatus(webhookDeliveryQueue),
+            getQueueStatus(testReportQueue),
+        ]),
+        getDeadLetterJobs(),
     ]);
 
-    return { queues };
+    return {
+        queues,
+        deadLetterJobs, 
+    };
 }
