@@ -1,0 +1,8 @@
+.git
+.env
+node_modules
+dist
+coverage
+reports
+apps/dashboard/node_modules
+apps/dashboard/.next

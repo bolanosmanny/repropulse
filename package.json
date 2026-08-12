@@ -4,13 +4,16 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts",
+    "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "worker:dev": "tsx watch src/workers/webhook-delivery-worker.ts",
-    "worker:test-reports": "tsx watch src/workers/test-report-worker.ts"
+    "worker:test-reports": "tsx watch src/workers/test-report-worker.ts",
+    "build": "tsc",
+    "worker:webhooks:prod": "node dist/workers/webhook-delivery-worker.js",
+    "worker:test-reports:prod": "node dist/workers/test-report-worker.js"
   },
   "keywords": [],
   "author": "",
