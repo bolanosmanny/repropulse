@@ -25,6 +25,23 @@ export type WorkflowRun = {
     completedAt: string | null;
 };
 
+export type TestExecution = {
+    testDefinitionId: string;
+    suiteName: string;
+    className: string;
+    testName: string;
+    outcome: "passed" | "failed" | "error" | "skipped";
+    durationMs: number | null;
+    failureType: string | null;
+    failureMessage: string | null;
+    githubWorkflowRunId: number;
+    workflowName: string;
+    headSha: string;
+    headBranch: string | null;
+    runAttempt: number;
+    completedAt: string | null;
+}
+
 const apiBaseUrl = 
     process.env.REPROPULSE_API_URL ?? "http://localhost:3001";
 
@@ -54,4 +71,13 @@ export async function getDashboardData(repositoryId: number) {
         scores: flakeScoreResponse.scores,
         workflowRuns: workflowRunsResponse.workflowRuns,
     }
+}
+
+export async function getTestExecutions(repositoryId: number) { 
+    const response = await getJson<{
+        repositoryId: number;
+        executions: TestExecution[];
+    }>(`/api/v1/repositories/${repositoryId}/test-executions?limit=100`);
+    
+    return response.executions;
 }

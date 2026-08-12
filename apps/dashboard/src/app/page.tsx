@@ -145,7 +145,13 @@ export default async function Home() {
           </p>
           <NavRow label = "Dashboard" active />
           <NavRow label = "Repositories" />
-          <NavRow label = "Test Explorer" />
+          <Link
+            href="/test-history"
+            className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-sm text-stone-600 hover:bg-stone-100"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-stone-400" />
+            Test Explorer
+          </Link>
           <Link
             href = "/workflows"
             className = "flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-sm text-stone-600 hover:bg-stone-100"
@@ -257,9 +263,12 @@ export default async function Home() {
               >
                 Workflow Runs
               </Link>
-              <button className = "rounded-lg px-3 py-1.5 text-sm text-stone-500">
+              <Link
+                href="/test-history"
+                className="rounded-lg px-3 py-1.5 text-sm text-stone-500"
+              >
                 Test History
-              </button>
+              </Link>
             </div>
 
             <div className = "mt-4">
