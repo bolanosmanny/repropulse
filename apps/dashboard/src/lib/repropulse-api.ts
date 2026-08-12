@@ -42,6 +42,28 @@ export type TestExecution = {
     completedAt: string | null;
 }
 
+export type QueueJobCounts = { 
+    waiting: number;
+    active: number;
+    delayed: number;
+    completed: number;
+    failed: number;
+};
+
+export type FailedQueueJob = { 
+    id: string | undefined;
+    name: string;
+    attemptsMade: number;
+    failedReason: string | undefined;
+    timestamp: number;
+};
+
+export type IngestionQueueStatus = { 
+    queueName: string;
+    counts: QueueJobCounts;
+    failedJobs: FailedQueueJob[];
+};
+
 const apiBaseUrl = 
     process.env.REPROPULSE_API_URL ?? "http://localhost:3001";
 
@@ -80,4 +102,12 @@ export async function getTestExecutions(repositoryId: number) {
     }>(`/api/v1/repositories/${repositoryId}/test-executions?limit=100`);
     
     return response.executions;
+}
+
+export async function getIngestionQueueStatus() { 
+    const response = await getJson<{
+        queues: IngestionQueueStatus[];  
+    }>("/api/v1/operations/ingestion-jobs");
+
+    return response.queues;
 }

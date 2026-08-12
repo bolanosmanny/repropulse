@@ -174,7 +174,13 @@ export default async function Home() {
             Flake Scores
           </Link>
           <NavRow label = "Failure Trends" />
-          <NavRow label = "Ingestion Jobs" />
+          <Link
+            href="/ingestion-jobs"
+            className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-sm text-stone-600 hover:bg-stone-100"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-stone-400" />
+            Ingestion Jobs
+          </Link>
           <NavRow label = "Settings" />
         </div>
 

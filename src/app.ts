@@ -5,6 +5,7 @@ import { testReportRoutes } from "./routes/test-reports.js";
 import { flakeScoreRoutes } from "./routes/flake-scores.js";
 import { workflowRunRoutes } from "./routes/workflow-runs.js";
 import { testExecutionsRoutes } from "./routes/test-executions.js";
+import { ingestionJobRoutes } from "./routes/ingestion-jobs.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -41,6 +42,7 @@ export function buildApp() {
   app.register(flakeScoreRoutes);
   app.register(workflowRunRoutes);
   app.register(testExecutionsRoutes);
+  app.register(ingestionJobRoutes);
 
   return app;
 }
