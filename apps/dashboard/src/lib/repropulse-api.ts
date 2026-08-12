@@ -79,6 +79,13 @@ export type ReliabilityMetrics = {
     workflowRunCount: number;
     testExecutionsStored: number;
     flakyTestsDetected: number;
+    estimatedCiTimeWastedMs: number;
+    failureTrend : {
+        date: string;
+        passed: number;
+        failed: number;
+        skipped: number;
+    }[];
     webhookProcessing: {
         processed: number;
         failed: number;
