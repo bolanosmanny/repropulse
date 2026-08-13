@@ -3,6 +3,12 @@ import {
   getReliabilityMetrics,
 } from "@/lib/repropulse-api";
 import Link from "next/link";
+import { RepositorySwitcher } from "@/components/repository-switcher";
+import {
+  getRepositorySelection,
+  repositoryHref,
+  type RepositorySearchParams,
+} from "@/lib/repository-selection";
 
 export const dynamic = "force-dynamic";
 
@@ -43,10 +49,17 @@ function StatusPill({
   );
 }
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: RepositorySearchParams;
+}) {
+  const { repositories, selectedRepository } =
+    await getRepositorySelection(searchParams);
+
   const [{ scores, workflowRuns }, metrics] = await Promise.all([
-    getDashboardData(1),
-    getReliabilityMetrics(1),
+    getDashboardData(selectedRepository.id),
+    getReliabilityMetrics(selectedRepository.id),
   ]);
 
   const kpis = [
@@ -132,7 +145,7 @@ export default async function Home() {
           </p>
 
           <Link
-            href="/"
+            href={repositoryHref("/", selectedRepository.id)}
             className="flex w-full items-center gap-3 rounded-[10px] border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-900 shadow-sm"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-slate-900" />
@@ -140,7 +153,7 @@ export default async function Home() {
           </Link>
 
           <Link
-            href="/test-history"
+            href={repositoryHref("/test-history", selectedRepository.id)}
             className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-sm text-stone-600 hover:bg-stone-100"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-stone-400" />
@@ -148,7 +161,7 @@ export default async function Home() {
           </Link>
 
           <Link
-            href="/workflows"
+            href={repositoryHref("/workflows", selectedRepository.id)}
             className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-sm text-stone-600 hover:bg-stone-100"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-stone-400" />
@@ -162,7 +175,7 @@ export default async function Home() {
           </p>
 
           <Link
-            href="/flake-scores"
+            href={repositoryHref("/flake-scores", selectedRepository.id)}
             className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-sm text-stone-600 hover:bg-stone-100"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-stone-400" />
@@ -170,7 +183,7 @@ export default async function Home() {
           </Link>
 
           <Link
-            href="/failure-trends"
+            href={repositoryHref("/failure-trends", selectedRepository.id)}
             className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-sm text-stone-600 hover:bg-stone-100"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-stone-400" />
@@ -188,12 +201,17 @@ export default async function Home() {
       </aside>
 
       <section className="min-w-0 flex-1">
-        <header className="flex h-[54px] items-center border-b border-stone-200 bg-stone-50 px-4">
+        <header className="flex h-[54px] items-center justify-between border-b border-stone-200 bg-stone-50 px-4">
           <p className="text-sm text-stone-500">
             Dashboard
             <span className="px-1 text-stone-300">/</span>
             Reliability Overview
           </p>
+
+          <RepositorySwitcher
+            repositories={repositories}
+            selectedRepositoryId={selectedRepository.id}
+          />
         </header>
 
         <div className="grid gap-4 p-4 xl:grid-cols-[248px_minmax(0,1fr)]">

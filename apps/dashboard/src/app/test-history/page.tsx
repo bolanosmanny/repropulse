@@ -1,5 +1,12 @@
 import Link from "next/link";
 import { getTestExecutions } from "@/lib/repropulse-api";
+import { RepositorySwitcher } from "@/components/repository-switcher";
+import {
+  getRepositorySelection,
+  repositoryHref,
+  type RepositorySearchParams,
+} from "@/lib/repository-selection";
+
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +34,15 @@ function formatDuration(durationMs: number | null) {
     return `${(durationMs / 1000).toFixed(2)} s`;
 }
 
-export default async function TestHistoryPage() { 
-    const executions = await getTestExecutions(1);
+export default async function TestHistoryPage({
+  searchParams,
+}: {
+  searchParams: RepositorySearchParams;
+}) {
+  const { repositories, selectedRepository } =
+    await getRepositorySelection(searchParams);
+
+  const executions = await getTestExecutions(selectedRepository.id);
 
     const failedExecutions = executions.filter(
         (execution) => 
@@ -46,12 +60,20 @@ export default async function TestHistoryPage() {
                     Dashboard <span className = "px-1 text-stone-300">/</span> Test History
                 </p>
 
-                <Link
-                    href = "/"
+                <div className="flex items-center gap-3">
+                    <RepositorySwitcher
+                        repositories={repositories}
+                        selectedRepositoryId={selectedRepository.id}
+                    />
+
+                    <Link
+                    href={repositoryHref("/", selectedRepository.id)}
                     className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600"
                 >
                     Back to Overview
-                </Link>
+                    </Link>
+                </div>
+
             </header>
 
             <div className = "mx-auto max-w-7xl p-4">

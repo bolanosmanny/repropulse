@@ -7,6 +7,7 @@ import { workflowRunRoutes } from "./routes/workflow-runs.js";
 import { testExecutionsRoutes } from "./routes/test-executions.js";
 import { ingestionJobRoutes } from "./routes/ingestion-jobs.js";
 import { reliabilityMetricsRoutes } from "./routes/reliability-metrics.js";
+import { repositoryRoutes } from "./routes/repositories.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -45,6 +46,7 @@ export function buildApp() {
   app.register(testExecutionsRoutes);
   app.register(ingestionJobRoutes);
   app.register(reliabilityMetricsRoutes);
+  app.register(repositoryRoutes);
 
   return app;
 }

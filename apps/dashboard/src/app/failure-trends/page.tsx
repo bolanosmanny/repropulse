@@ -1,5 +1,11 @@
 import Link from 'next/link';
 import { getReliabilityMetrics } from "@/lib/repropulse-api";
+import { RepositorySwitcher } from "@/components/repository-switcher";
+import {
+  getRepositorySelection,
+  repositoryHref,
+  type RepositorySearchParams,
+} from "@/lib/repository-selection";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +17,15 @@ function formatDuration(durationMs: number) {
     return `${(durationMs / 1000).toFixed(2)} s`;
 }
 
-export default async function FailureTrendsPage() { 
-    const metrics = await getReliabilityMetrics(1);
+export default async function FailureTrendsPage({
+  searchParams,
+}: {
+  searchParams: RepositorySearchParams;
+}) {
+  const { repositories, selectedRepository } =
+    await getRepositorySelection(searchParams);
+
+  const metrics = await getReliabilityMetrics(selectedRepository.id);
 
     const maxExecutions = Math.max(
         1,
@@ -33,12 +46,19 @@ export default async function FailureTrendsPage() {
                     Dashboard <span className = "px-1 text-stone-300">/</span> Failure Trends
                 </p>
 
-                <Link 
-                    href ="/"
-                    className = "rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600"
-                >
-                    Back to Overview
-                </Link>
+                <div className="flex items-center gap-3">
+                    <RepositorySwitcher
+                        repositories={repositories}
+                        selectedRepositoryId={selectedRepository.id}
+                    />
+
+                    <Link
+                        href={repositoryHref("/", selectedRepository.id)}
+                        className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600"
+                    >
+                        Back to Overview
+                    </Link>
+                </div>
             </header>
 
             <div className = "mx-auto max-w-6xl p-4">

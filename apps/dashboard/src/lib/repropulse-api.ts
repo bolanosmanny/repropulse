@@ -146,3 +146,17 @@ export async function getReliabilityMetrics(repositoryId: number) {
         `/api/v1/repositories/${repositoryId}/reliability-metrics`
     );
 }
+
+export type Repository = {
+  id: number;
+  fullName: string;
+  defaultBranch: string | null;
+};
+
+export async function getRepositories() {
+  const response = await getJson<{ repositories: Repository[] }>(
+    "/api/v1/repositories"
+  );
+
+  return response.repositories;
+}

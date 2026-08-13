@@ -1,5 +1,11 @@
 import Link from "next/link";
 import { getDashboardData } from "@/lib/repropulse-api";
+import { RepositorySwitcher } from "@/components/repository-switcher";
+import {
+  getRepositorySelection,
+  repositoryHref,
+  type RepositorySearchParams,
+} from "@/lib/repository-selection";
 
 export const dynamic = "force-dynamic";
 
@@ -15,22 +21,36 @@ function statusTone(status: string) {
     return "border-stone-200 bg-stone-50 text-stone-700";
 }
 
-export default async function WorkflowsPage() {
-    const { workflowRuns } = await getDashboardData(1);
+export default async function WorkflowsPage({
+  searchParams,
+}: {
+  searchParams: RepositorySearchParams;
+}) {
+  const { repositories, selectedRepository } =
+    await getRepositorySelection(searchParams);
+
+  const { workflowRuns } = await getDashboardData(selectedRepository.id);
 
     return ( 
         <main className = "min-h-screen bg-stone-100">
-            <header className = "flex h-[54px] items-center justify-between border-b border-stone-200 bg-stone-5o px-4">
+            <header className = "flex h-[54px] items-center justify-between border-b border-stone-200 bg-stone-50 px-4">
                 <p className = "text-sm text-stone-500">
-                    Dashboard <span className = "px text-stone-300">/</span> Workflow Runs
+                    Dashboard <span className = "px-1 text-stone-300">/</span> Workflow Runs
                 </p>
 
-                <Link
-                    href = "/"
-                    className = "rounded-lg border border-stone-200 bg-white px-3 py-2 text-stone-600"
-                >
-                    Back to Overview
-                </Link>
+                <div className="flex items-center gap-3">
+                    <RepositorySwitcher
+                        repositories={repositories}
+                        selectedRepositoryId={selectedRepository.id}
+                    />
+
+                    <Link
+                        href={repositoryHref("/", selectedRepository.id)}
+                        className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600"
+                    >
+                        Back to Overview
+                    </Link>
+                </div>
             </header>
 
             <div className = "mx-auto max-w-6xl p-4">

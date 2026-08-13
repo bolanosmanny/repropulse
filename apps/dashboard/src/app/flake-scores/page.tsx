@@ -1,5 +1,11 @@
 import Link from 'next/link';
 import { getDashboardData } from '@/lib/repropulse-api';
+import { RepositorySwitcher } from "@/components/repository-switcher";
+import {
+  getRepositorySelection,
+  repositoryHref,
+  type RepositorySearchParams,
+} from "@/lib/repository-selection";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +33,15 @@ function scoreTone(scorePercent: number) {
     };
 }
 
-export default async function FlakeScoresPage() { 
-    const { scores } = await getDashboardData(1);
+export default async function FlakeScoresPage({
+  searchParams,
+}: {
+  searchParams: RepositorySearchParams;
+}) {
+  const { repositories, selectedRepository } =
+    await getRepositorySelection(searchParams);
+
+  const { scores } = await getDashboardData(selectedRepository.id);
 
     const sortedScores = [...scores].sort(
         (left, right) =>
@@ -56,12 +69,19 @@ export default async function FlakeScoresPage() {
                     Dashboard <span className = "px-1 text-stone-400">/</span> Flake Scores
                 </p>
 
-                <Link
-                    href="/"
-                    className = "rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600"
-                >
-                    Back to Overview
-                </Link>
+                <div className="flex items-center gap-3">
+                    <RepositorySwitcher
+                        repositories={repositories}
+                        selectedRepositoryId={selectedRepository.id}
+                    />
+
+                    <Link
+                        href={repositoryHref("/", selectedRepository.id)}
+                        className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600"
+                    >
+                        Back to Overview
+                    </Link>
+                </div>
             </header>
 
             <div className = "mx-auto max-w-6xl p-4">
