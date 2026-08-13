@@ -174,3 +174,39 @@ export const testExecutions = pgTable(
         index("test_executions_outcome_idx").on(table.outcome),
     ]
 );
+
+export const pullRequestFeedback = pgTable(
+    "pull_request_feedback",
+    {
+        id: serial("id").primaryKey(),
+        repositoryId: integer("repository_id")
+            .notNull()
+            .references(() => repositories.id),
+        githubInstallationId: bigint("github_installation_id", {
+            mode: "number",
+        }).notNull(),
+        pullRequestNumber: integer("pull_request_number").notNull(),
+        headSha: varchar("head_sha", { length: 64 }).notNull(),
+        status: varchar("status", { length: 20 })
+            .notNull()
+            .default("pending"),
+        riskCount: integer("risk_count").notNull().default(0),
+        githubCommentId: bigint("github_comment_id", {
+            mode: "number",
+        }),
+        createdAt: timestamp("created_at", { withTimezone: true })
+            .notNull()
+            .defaultNow(),
+        updatedAt: timestamp("updated_at", { withTimezone: true })
+            .notNull()
+            .defaultNow(),
+    },
+    (table) => [
+        uniqueIndex("pull_request_feedback_commit_unique").on(
+            table.repositoryId,
+            table.pullRequestNumber,
+            table.headSha
+        ),
+        index("pull_request_feedback_status_idx").on(table.status),
+    ]
+);

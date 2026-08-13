@@ -71,6 +71,13 @@
       "when": 1786589720729,
       "tag": "0009_amused_falcon",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786639750473,
+      "tag": "0010_square_shocker",
+      "breakpoints": true
     }
   ]
 }
