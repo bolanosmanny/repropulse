@@ -8,7 +8,8 @@ import {
     varchar,
     bigint,
     text,
-    uniqueIndex
+    uniqueIndex,
+    boolean,
 } from "drizzle-orm/pg-core";
 
 export const webhookDeliveries = pgTable(
@@ -51,6 +52,31 @@ export const repositories = pgTable(
     },
     (table) => [
         uniqueIndex("repositories_full_name_unique").on(table.fullName),
+    ]
+);
+
+export const githubInstallations = pgTable(
+    "github_installations",
+    {
+        id: serial("id").primaryKey(),
+        githubInstallationId: bigint("github_installation_id", {
+            mode: "number",
+    })
+        .notNull()
+        .unique(),
+    accountLogin: varchar("account_login", { length: 255 }).notNull(),
+    accountType: varchar("account_type", { length: 50 }).notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    suspendedAt: timestamp("created_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+    },
+    (table) => [
+        index("github_installations_active_idx").on(table.isActive),
     ]
 );
 

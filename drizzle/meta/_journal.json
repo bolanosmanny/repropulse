@@ -50,6 +50,13 @@
       "when": 1786327436191,
       "tag": "0006_amazing_kree",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786562780020,
+      "tag": "0007_chief_robbie_robertson",
+      "breakpoints": true
     }
   ]
 }

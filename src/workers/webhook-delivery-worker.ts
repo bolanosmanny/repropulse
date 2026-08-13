@@ -10,6 +10,8 @@ import type { ProcessWebhookDeliveryJob } from "../queue/webhook-delivery-queue.
 import { parseWorkflowRunWebhookPayload } from "../workflows/workflow-run-payload.js";
 import { upsertWorkflowRun } from "../workflows/workflow-run-repository.js";
 import { deadLetterQueue } from "../queue/dead-letter-queue.js";
+import { parseInstallationWebhookPayload } from "../github-app/installation-payload.js";
+import { upsertGitHubInstallation } from "../github-app/installation-repository.js";
 
 const logger = pino({
     name: "webhook-delivery-worker",
@@ -46,6 +48,24 @@ const worker = new Worker<ProcessWebhookDeliveryJob>(
                 },
                 "Workflow run stored"
             );
+        
+        } else if (delivery.eventName === "installation") { 
+            const payload = parseInstallationWebhookPayload(delivery.payload);
+
+            const isActive =
+                payload.action === "created" || payload.action === "unsuspend";
+
+            const installation = await upsertGitHubInstallation({
+                githubInstallationId: payload.installation.id,
+                accountLogin: payload.installation.account.login,
+                accountType: payload.installation.account.type,
+                isActive,
+                suspendedAt:
+                    payload.installation.suspended_at == null
+                        ? null
+                        : new Date(payload.installation.suspended_at),
+            });
+
         } else { 
             logger.info(
                 {

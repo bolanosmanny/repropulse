@@ -35,6 +35,11 @@ describe("POST /webhooks/github", () => {
             action: "created",
             installation: {
                 id: 12345,
+                suspended_at: null,
+                account: {
+                    login: "emanuel-bolanos",
+                    type: "User",
+                },
             },
         });
 
