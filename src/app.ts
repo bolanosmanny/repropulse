@@ -1,4 +1,6 @@
 import Fastify from "fastify";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
 import { githubWebhooksRoutes } from "./routes/github-webhooks.js";
 import { healthRoutes } from "./routes/health.js";
 import { testReportRoutes } from "./routes/test-reports.js";
@@ -14,6 +16,44 @@ export function buildApp() {
     logger: true,
   });
 
+  app.register(swagger, {
+    openapi: {
+      openapi: "3.0.3",
+      info: {
+        title: "ReproPulse API",
+        description:
+          "API for GitHub CI reliability ingestion, deterministic flake scoring, and operational metrics.",
+        version: "1.0.0",
+      },
+      tags: [
+        {
+          name: "Health",
+          description: "Service availability checks.",
+        },
+        {
+          name: "Repositories",
+          description: "Connected GitHub repositories and repository-scoped data.",
+        },
+        {
+          name: "Ingestion",
+          description: "GitHub webhook and JUnit report ingestion endpoints.",
+        },
+        {
+          name: "Operations",
+          description: "Background queue and dead-letter operational visibility.",
+        },
+      ],
+    },
+  });
+
+  app.register(swaggerUi, {
+    routePrefix: "/docs",
+    uiConfig: {
+      docExpansion: "list",
+      deepLinking: false,
+    },
+  });
+
   app.addContentTypeParser(
     "application/json",
     { parseAs: "string" },
@@ -25,16 +65,16 @@ export function buildApp() {
   app.addContentTypeParser(
     "application/xml",
     { parseAs: "string" },
-    (_request, body, done) => { 
-        done(null, body);
+    (_request, body, done) => {
+      done(null, body);
     }
   );
 
   app.addContentTypeParser(
     "text/xml",
     { parseAs: "string" },
-    (_request, body, done) => { 
-        done(null, body);
+    (_request, body, done) => {
+      done(null, body);
     }
   );
 

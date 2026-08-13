@@ -22,6 +22,8 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "@fastify/swagger": "^9.8.1",
+    "@fastify/swagger-ui": "^6.1.1",
     "@octokit/webhooks": "^14.2.0",
     "bullmq": "^6.0.9",
     "dotenv": "^17.4.2",

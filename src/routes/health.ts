@@ -5,12 +5,16 @@ export const healthRoutes: FastifyPluginAsync = async (app) => {
     "/health",
     {
       schema: {
+        tags: ["Health"],
+        summary: "Check service health",
+        description:
+          "Returns a lightweight availability response. Used by Docker health checks and deployment verification.",
         response: {
           200: {
             type: "object",
             properties: {
-              service: { type: "string" },
-              status: { type: "string" },
+              service: { type: "string", examples: ["repropulse"] },
+              status: { type: "string", examples: ["ok"] },
             },
             required: ["service", "status"],
           },
