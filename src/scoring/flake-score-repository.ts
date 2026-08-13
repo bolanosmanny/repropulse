@@ -17,6 +17,7 @@ export type TestFlakeScore = {
     className: string;
     testName: string;
     flakeScore: FlakeScore;
+    sourceFile: string | null;
 };
 
 function toTestOutcome(outcome: string) : TestOutcome { 
@@ -41,6 +42,7 @@ export async function getFlakeScoresForRepository(
             suiteName: testDefinitions.suiteName,
             className: testDefinitions.className,
             testName: testDefinitions.testName,
+            sourceFile: testDefinitions.sourceFile,
             headSha: workflowRuns.headSha,
             runAttempt: workflowRuns.runAttempt,
             outcome: testExecutions.outcome,
@@ -62,6 +64,7 @@ export async function getFlakeScoresForRepository(
             suiteName: string;
             className: string;
             testName: string;
+            sourceFile: string | null;
             executions: {
                 headSha: string;
                 runAttempt: number;
@@ -78,6 +81,7 @@ export async function getFlakeScoresForRepository(
                 suiteName: row.suiteName,
                 className: row.className,
                 testName: row.testName,
+                sourceFile: row.sourceFile,
                 executions: [
                     {
                         headSha: row.headSha,
@@ -103,6 +107,7 @@ export async function getFlakeScoresForRepository(
             suiteName: test.suiteName,
             className: test.className,
             testName: test.testName,
+            sourceFile: test.sourceFile,
             flakeScore: calculateFlakeScore(test.executions),
         }))
         .sort(
