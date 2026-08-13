@@ -49,6 +49,7 @@ describe("createPullRequestFeedback", () => {
             githubInstallationId: 123456,
             pullRequestNumber,
             headSha,
+            repositoryFullName: "repropulse-test/feedback-fixture",
         };
         
         const first = await createPullRequestFeedback(input);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     parsePullRequestWebhookPayload,
+    shouldEvaluatePullRequest,
 } from "./pull-request-payload.js";
 
 describe("parsePullRequestWebhookPayload", () => {
@@ -32,21 +33,23 @@ describe("parsePullRequestWebhookPayload", () => {
         );
     });
 
-    it("rejects pull request actions ReproPulse does not evaluate", () => {
-        expect(() =>
-            parsePullRequestWebhookPayload({
-                action: "closed",
-                number: 42,
-                installation: { id: 9001 },
-                repository: {
-                    id: 1001,
-                    full_name: "emanuel-bolanos/repropulse",
-                },
-                pull_request: {
-                    head: { sha: "abc123def456" },
-                    base: { ref: "main" },
-                },
-            })
-        ).toThrow();
+    it("identifies actions ReproPulse does not evaluate", () => {
+        expect(
+            shouldEvaluatePullRequest(
+                parsePullRequestWebhookPayload({
+                    action: "closed",
+                    number: 42,
+                    installation: { id: 9001 },
+                    repository: {
+                        id: 1001,
+                        full_name: "emanuel-bolanos/repropulse",
+                    },
+                    pull_request: {
+                        head: { sha: "abc123def456" },
+                        base: { ref: "main" },
+                    },
+                })
+            )
+        ).toEqual(false);
     });
 });

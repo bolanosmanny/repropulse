@@ -10,26 +10,29 @@ type CreatePullRequestFeedbackInput = {
     githubInstallationId: number;
     pullRequestNumber: number;
     headSha: string;
+    repositoryFullName: string;
 };
 
 export async function createPullRequestFeedback(
     input: CreatePullRequestFeedbackInput
 ) {
     const [repository] = await db
-        .select({ id: repositories.id })
-        .from(repositories)
-        .where(
-            eq(
-                repositories.githubRepositoryId,
-                input.githubRepositoryId
-            )
-        )
-        .limit(1);
-    
+        .insert(repositories)
+        .values({
+            githubRepositoryId: input.githubRepositoryId,
+            fullName: input.repositoryFullName,
+        })
+        .onConflictDoUpdate({
+            target: repositories.githubRepositoryId,
+            set: {
+                fullName: input.repositoryFullName,
+                updatedAt: new Date(),
+            },
+        })
+        .returning();
+
     if (repository == null) {
-        throw new Error(
-            `Repository ${input.githubRepositoryId} is not tracked by ReproPulse.`
-        );
+        throw new Error("Failed to save pull request repository");
     }
 
     const [feedback] = await db

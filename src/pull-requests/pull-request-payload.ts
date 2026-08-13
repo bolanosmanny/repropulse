@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-const pullRequestActionSchema = z.enum([
+const evaluatedPullRequestActions = new Set([
     "opened",
     "reopened",
     "synchronize",
 ]);
 
 export const pullRequestWebhookPayloadSchema = z.object({
-    action: pullRequestActionSchema,
+    action: z.string().min(1),
     number: z.number().int().positive(),
     installation: z.object({
         id: z.number().int().positive(),
@@ -32,4 +32,10 @@ export type PullRequestWebhookPayload = z.infer<
 
 export function parsePullRequestWebhookPayload(payload: unknown) { 
     return pullRequestWebhookPayloadSchema.parse(payload);
+}
+
+export function shouldEvaluatePullRequest(
+    payload: PullRequestWebhookPayload
+) : boolean {
+    return evaluatedPullRequestActions.has(payload.action);
 }

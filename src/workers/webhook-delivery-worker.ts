@@ -12,6 +12,13 @@ import { upsertWorkflowRun } from "../workflows/workflow-run-repository.js";
 import { deadLetterQueue } from "../queue/dead-letter-queue.js";
 import { parseInstallationWebhookPayload } from "../github-app/installation-payload.js";
 import { upsertGitHubInstallation } from "../github-app/installation-repository.js";
+import {
+    parsePullRequestWebhookPayload,
+    shouldEvaluatePullRequest,
+} from "../pull-requests/pull-request-payload.js";
+import {
+    createPullRequestFeedback,
+} from "../pull-requests/pull-request-feedback-repository.js";
 
 const logger = pino({
     name: "webhook-delivery-worker",
@@ -66,6 +73,38 @@ const worker = new Worker<ProcessWebhookDeliveryJob>(
                         : new Date(payload.installation.suspended_at),
             });
 
+        } else if (delivery.eventName === "pull_request") {
+            const payload = parsePullRequestWebhookPayload(delivery.payload);
+
+            if (!shouldEvaluatePullRequest(payload)) {
+                logger.info(
+                    {
+                        deliveryId: delivery.deliveryId,
+                        action: payload.action,
+                    },
+                    "Ignoring pull request action"
+                );
+            } else {
+                const feedback = await createPullRequestFeedback({
+                    githubRepositoryId: payload.repository.id,
+                    repositoryFullName: payload.repository.full_name,
+                    githubInstallationId: payload.installation.id,
+                    pullRequestNumber: payload.number,
+                    headSha: payload.pull_request.head.sha,
+                });
+
+                logger.info(
+                    {
+                        deliveryId: delivery.deliveryId,
+                        pullRequestNumber: payload.number,
+                        headSha: payload.pull_request.head.sha,
+                        feedbackId: feedback?.id,
+                        duplicate: feedback == null,
+                    },
+                    "Pull request feedback claimed"
+                );
+            }
+            
         } else { 
             logger.info(
                 {
