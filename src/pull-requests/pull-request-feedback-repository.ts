@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 import {
     pullRequestFeedback,
@@ -44,6 +44,26 @@ export async function createPullRequestFeedback(
             headSha: input.headSha,
         })
         .onConflictDoNothing()
+        .returning();
+
+    return feedback ?? null;
+}
+
+export async function claimPendingPullRequestFeedback(
+    feedbackId: number
+) {
+    const [feedback] = await db
+        .update(pullRequestFeedback)
+        .set({
+            status: "processing",
+            updatedAt: new Date(),
+        })
+        .where(
+            and(
+                eq(pullRequestFeedback.id, feedbackId),
+                eq(pullRequestFeedback.status, "pending")
+            )
+        )
         .returning();
 
     return feedback ?? null;

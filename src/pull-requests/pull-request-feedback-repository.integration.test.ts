@@ -6,8 +6,10 @@ import {
     repositories,
 } from "../db/schema.js";
 import {
+    claimPendingPullRequestFeedback,
     createPullRequestFeedback,
 } from "./pull-request-feedback-repository.js";
+
 
 const githubRepositoryId = 987654321;
 const pullRequestNumber = 42;
@@ -59,6 +61,12 @@ describe("createPullRequestFeedback", () => {
         expect(duplicate).toBeNull();
         expect(first?.riskCount).toBe(0);
         expect(first?.status).toBe("pending");
+
+        const claimed = await claimPendingPullRequestFeedback(first!.id);
+        const secondClaim = await claimPendingPullRequestFeedback(first!.id);
+
+        expect(claimed?.status).toBe("processing");
+        expect(secondClaim).toBeNull();
     });
 });
 
