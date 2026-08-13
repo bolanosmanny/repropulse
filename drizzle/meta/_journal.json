@@ -57,6 +57,13 @@
       "when": 1786562780020,
       "tag": "0007_chief_robbie_robertson",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786588896472,
+      "tag": "0008_previous_leader",
+      "breakpoints": true
     }
   ]
 }

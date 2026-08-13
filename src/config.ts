@@ -7,6 +7,8 @@ const environmentSchema = z.object({
     DATABASE_URL: z.string().url(),
     REDIS_URL: z.string().url(),
     GITHUB_WEBHOOK_SECRET: z.string().min(32),
+    GITHUB_APP_ID: z.coerce.number().int().positive().optional(),
+    GITHUB_APP_PRIVATE_KEY: z.string().min(1).optional(),
     REPROPULSE_INGESTION_TOKEN: z.string().min(32),
 });
 

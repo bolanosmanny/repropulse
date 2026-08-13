@@ -67,7 +67,7 @@ export const githubInstallations = pgTable(
     accountLogin: varchar("account_login", { length: 255 }).notNull(),
     accountType: varchar("account_type", { length: 50 }).notNull(),
     isActive: boolean("is_active").notNull().default(true),
-    suspendedAt: timestamp("created_at", { withTimezone: true }),
+    suspendedAt: timestamp("suspended_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
         .notNull()
         .defaultNow(),
