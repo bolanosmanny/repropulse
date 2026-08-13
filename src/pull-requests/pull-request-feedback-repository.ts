@@ -68,3 +68,50 @@ export async function claimPendingPullRequestFeedback(
 
     return feedback ?? null;
 }
+
+export async function markPullRequestFeedbackNoRisk(
+    feedbackId: number
+) {
+    await db
+        .update(pullRequestFeedback)
+        .set({
+            status: "no-risk",
+            riskCount: 0,
+            updatedAt: new Date(),
+        })
+        .where(eq(pullRequestFeedback.id, feedbackId));
+}
+
+export async function markPullRequestFeedbackCommented(input: {
+    feedbackId: number;
+    riskCount: number;
+    githubCommentId: number;
+}) {
+    await db
+        .update(pullRequestFeedback)
+        .set({
+            status: "commented",
+            riskCount: input.riskCount,
+            githubCommentId: input.githubCommentId,
+            updatedAt: new Date(),
+        })
+        .where(eq(pullRequestFeedback.id, input.feedbackId));
+}
+
+export async function releasePullRequestFeedbackClaim(
+    feedbackId: number
+) {
+    await db
+        .update(pullRequestFeedback)
+        .set({
+            status: "pending",
+            updatedAt: new Date(),
+        })
+        .where(
+            and(
+                eq(pullRequestFeedback.id, feedbackId),
+                eq(pullRequestFeedback.status, "processing")
+            )
+        );
+}
+
