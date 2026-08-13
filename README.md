@@ -2,7 +2,7 @@
 
 **ReproPulse** is a CI reliability platform for GitHub Actions. It ingests workflow events and JUnit test reports, detects retry-recovered test failures, calculates transparent flake scores, and presents reliability evidence in a dashboard.
 
-[Repository](https://github.com/bolanosmanny/repropulse) · On-demand AWS demo environment
+[Repository](https://github.com/bolanosmanny/repropulse) · On-demand AWS demo environment · API docs at `/docs/` when the demo environment is running
 
 ## Why it exists
 
