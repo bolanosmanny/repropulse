@@ -126,6 +126,37 @@ export default async function Home({
     0
   );
 
+  const completedAttempts = scores.reduce(
+    (total, score) => total + score.flakeScore.completedAttempts,
+    0
+  );
+
+  const transientFailures = scores.reduce(
+    (total, score) => total + score.flakeScore.transientFailures,
+    0
+  );
+
+  const testsWithHistory = scores.filter(
+    (score) => score.flakeScore.completedAttempts > 0
+  ).length;
+
+  const stableTests = scores.filter(
+    (score) =>
+      score.flakeScore.completedAttempts > 0 &&
+      score.flakeScore.transientFailures === 0
+  ).length;
+
+  const highestRisk = [...scores].sort(
+    (a, b) => b.flakeScore.scorePercent - a.flakeScore.scorePercent
+  )[0];
+
+  const evidenceQuality =
+    completedAttempts >= 30
+      ? { label: "Established history", tone: "good" as const }
+      : completedAttempts >= 10
+        ? { label: "Growing history", tone: "muted" as const }
+        : { label: "Limited history", tone: "muted" as const };
+
   return (
     <main className="min-h-screen bg-stone-100 lg:flex">
       <aside className="hidden w-60 shrink-0 border-r border-stone-200 bg-stone-50 p-3 lg:flex lg:flex-col">
@@ -370,83 +401,74 @@ export default async function Home({
               </div>
 
               <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-                <h2 className="text-[15px] font-medium">
-                  Reliability Confidence
-                </h2>
+                <h2 className="text-[15px] font-medium">Reliability Evidence</h2>
                 <p className="mt-1 text-xs text-stone-500">
-                  Current CI health and the signals reducing confidence.
+                  Signals calculated from completed test executions for this repository.
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   <div className="rounded-xl border border-stone-200 bg-stone-50 p-3">
                     <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-stone-400">
-                      Confidence
+                      Completed Attempts
                     </p>
-                    <p className="mt-2 text-xl font-medium">50%</p>
+                    <p className="mt-2 text-xl font-medium">{completedAttempts}</p>
                     <p className="mt-1 text-xs text-stone-500">
-                      Needs more run history
+                      Passed, failed, or errored executions
                     </p>
                   </div>
+
                   <div className="rounded-xl border border-stone-200 bg-stone-50 p-3">
                     <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-stone-400">
-                      Highest Risk
+                      Highest Flake Score
                     </p>
-                    <p className="mt-2 text-xl font-medium">50%</p>
-                    <p className="mt-1 text-xs text-stone-500">
-                      auth.tokens
+                    <p className="mt-2 text-xl font-medium">
+                      {highestRisk ? `${highestRisk.flakeScore.scorePercent}%` : "—"}
+                    </p>
+                    <p className="mt-1 truncate text-xs text-stone-500">
+                      {highestRisk
+                        ? highestRisk.testName
+                        : "No completed test history yet"}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-5">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">Signal Quality</p>
-                    <StatusPill label="Moderate Risk" tone="risk" />
+                    <p className="text-sm font-medium">Evidence Quality</p>
+                    <StatusPill label={evidenceQuality.label} tone={evidenceQuality.tone} />
                   </div>
 
-                  {[
-                    ["Completed Test Attempts", "2 / 2", "w-full"],
-                    ["Retry-Recovered Failures", "1 Observed", "w-1/2"],
-                    ["Tests With Stable History", "1 / 3", "w-1/3"],
-                  ].map(([label, value, width]) => (
-                    <div key={label} className="mt-3">
-                      <div className="flex justify-between text-xs text-stone-500">
-                        <span>{label}</span>
-                        <span>{value}</span>
-                      </div>
-                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-stone-100">
-                        <div
-                          className={`h-full rounded-full bg-slate-900 ${width}`}
-                        />
-                      </div>
+                  <dl className="mt-3 divide-y divide-stone-100 rounded-xl border border-stone-100 px-3">
+                    <div className="flex items-center justify-between py-3 text-xs">
+                      <dt className="text-stone-500">Tests with completed history</dt>
+                      <dd className="font-medium text-stone-800">
+                        {testsWithHistory} / {scores.length}
+                      </dd>
                     </div>
-                  ))}
+
+                    <div className="flex items-center justify-between py-3 text-xs">
+                      <dt className="text-stone-500">Retry-recovered failures</dt>
+                      <dd className="font-medium text-stone-800">
+                        {transientFailures} observed
+                      </dd>
+                    </div>
+
+                    <div className="flex items-center justify-between py-3 text-xs">
+                      <dt className="text-stone-500">Tests with stable history</dt>
+                      <dd className="font-medium text-stone-800">
+                        {stableTests} / {scores.length}
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
 
                 <div className="mt-5 border-t border-stone-100 pt-4">
-                  <p className="text-sm font-medium">
-                    What changes the release call
+                  <p className="text-sm font-medium">Interpretation</p>
+                  <p className="mt-1 text-xs leading-5 text-stone-500">
+                    {transientFailures > 0
+                      ? "At least one test failed and later passed on the same commit. Review those tests before treating their failures as release-blocking."
+                      : "No retry-recovered failures have been observed yet. Continue collecting CI history to strengthen the flake signal."}
                   </p>
-                  <div className="mt-3 space-y-3 text-xs">
-                    <div>
-                      <p className="font-medium text-stone-700">
-                        High-risk tests
-                      </p>
-                      <p className="mt-1 leading-5 text-stone-500">
-                        A stable rerun lowers the flake score and increases
-                        confidence in a genuine failure.
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-stone-700">
-                        Add CI History
-                      </p>
-                      <p className="mt-1 leading-5 text-stone-500">
-                        More workflow attempts make flake scores more
-                        reliable.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </section>
