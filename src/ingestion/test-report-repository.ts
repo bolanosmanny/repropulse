@@ -37,6 +37,7 @@ export async function storeTestReport(
                     suiteName: parsedTest.suiteName,
                     className: parsedTest.className,
                     testName: parsedTest.testName,
+                    sourceFile: parsedTest.sourceFile,
                 })
                 .onConflictDoUpdate({
                     target: [
@@ -46,6 +47,9 @@ export async function storeTestReport(
                         testDefinitions.testName,
                     ],
                     set: { 
+                        ...(parsedTest.sourceFile == null
+                            ? {}
+                            : { sourceFile: parsedTest.sourceFile }),
                         updatedAt: new Date(),
                     },
                 })
@@ -70,7 +74,7 @@ export async function storeTestReport(
                         testExecutions.workflowRunId,
                         testExecutions.testDefinitionId,
                     ],
-                    set: { 
+                    set: {
                         outcome: parsedTest.outcome,
                         durationMs: parsedTest.durationMs,
                         failureType: parsedTest.failureType,

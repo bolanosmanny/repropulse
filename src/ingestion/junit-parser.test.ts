@@ -10,6 +10,7 @@ describe("parseJUnitXml", () => {
                         classname="auth.tokens"
                         name="accepts valid token"
                         time="0.018"
+                        file="src/auth/tokens.test.ts"
                     />
                     <testcase
                         classname="auth.tokens"
@@ -47,6 +48,7 @@ describe("parseJUnitXml", () => {
                 durationMs: 18,
                 failureType: null,
                 failureMessage: null,
+                sourceFile: "src/auth/tokens.test.ts",
             },
             {
                 suiteName: "authentication",
@@ -56,6 +58,7 @@ describe("parseJUnitXml", () => {
                 durationMs: 25,
                 failureType: "AssertionError",
                 failureMessage: "Expected token to be rejected",
+                sourceFile: null,
             },
             {
                 suiteName: "authentication",
@@ -65,6 +68,7 @@ describe("parseJUnitXml", () => {
                 durationMs: null,
                 failureType: null,
                 failureMessage: null,
+                sourceFile: null,
             },
             {
                 suiteName: "authentication",
@@ -74,6 +78,7 @@ describe("parseJUnitXml", () => {
                 durationMs: null,
                 failureType: "NetworkError",
                 failureMessage: "Connection refused",
+                sourceFile: null,
             },
         ]);
     });

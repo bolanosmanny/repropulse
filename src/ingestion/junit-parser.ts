@@ -10,6 +10,7 @@ export type ParsedJUnitTest = {
     durationMs: number | null;
     failureType: string | null;
     failureMessage: string | null;
+    sourceFile: string | null;
 };
 
 type XmlObject = Record<string, unknown>;
@@ -143,6 +144,7 @@ function collectTestsFromSuite(
             testName,
             durationMs: getDurationMs(testCase),
             ...failureDetails,
+            sourceFile: getAttribute(testCase, "file"),
         });
     }
 

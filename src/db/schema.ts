@@ -126,6 +126,7 @@ export const testDefinitions = pgTable(
             .notNull()
             .default(""),
         testName: varchar("test_name", { length: 500 }).notNull(),
+        sourceFile: varchar("source_file", { length: 1000 }),
         createdAt: timestamp("created_at", { withTimezone: true })
             .notNull()
             .defaultNow(),
@@ -141,6 +142,7 @@ export const testDefinitions = pgTable(
             table.testName
         ),
         index("test_definitions_repository_id_idx").on(table.repositoryId),
+        index("test_definitions_source_file_idx").on(table.sourceFile),
     ]
 );
 
