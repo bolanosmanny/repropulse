@@ -4,7 +4,7 @@
 
 The [August 13 deployment snapshot](../README.md#deployment-verification) shows ingestion from two repositories: 3 workflow runs and 51 JUnit executions. It reports no observed retry-recovered failure. These numbers are a deployment smoke test, not a measure of real-world flake detection.
 
-GitHub Actions currently lists [27 ReproPulse runs](https://github.com/bolanosmanny/repropulse/actions) from August 10–13 and [24 Stratos runs](https://github.com/bolanosmanny/stratos/actions) from July 30–August 13. Neither repository has a run after August 13. Most of these runs predate the integration and cannot be counted as ReproPulse-ingested test history. The elapsed calendar time since August does not constitute several weeks of active CI evidence.
+Before this validation branch, GitHub Actions listed [27 ReproPulse runs](https://github.com/bolanosmanny/repropulse/actions) from August 10–13 and [24 Stratos runs](https://github.com/bolanosmanny/stratos/actions) from July 30–August 13. Neither repository ran again until this October 21 validation PR. Most historical runs predate the integration; the new PR checks also cannot be counted as ingested while the demo server is offline. The elapsed calendar time since August does not constitute several weeks of active CI evidence.
 
 | Requested measure | Current evidence |
 | --- | --- |
@@ -29,12 +29,12 @@ Run this only while the on-demand ReproPulse API and both workers are available:
 
 | Controlled evidence | Result |
 | --- | --- |
-| GitHub run URL and commit | Pending |
-| Attempt 1 JUnit upload | Pending |
-| Attempt 2 JUnit upload | Pending |
-| Failed then passed test history | Pending |
-| Flake score and dashboard | Pending |
-| Pull-request feedback | Pending |
+| GitHub run URL and commit | [Run 39673145941](https://github.com/bolanosmanny/repropulse/actions/runs/39673145941), SHA `d89181da279c9a2a6c135dc8e915ce6e2cdd250e`; attempt 1 failed, attempt 2 passed on the same SHA |
+| Attempt 1 JUnit upload | [Job 119475973875](https://github.com/bolanosmanny/repropulse/actions/runs/39673145941/job/119475973875) received `accepted: true`, `runAttempt: 1` |
+| Attempt 2 JUnit upload | [Job 119476366718](https://github.com/bolanosmanny/repropulse/actions/runs/39673145941/job/119476366718) received `accepted: true`, `runAttempt: 2` |
+| Failed then passed test history | [Test-executions API](https://repropulse.duckdns.org/api/v1/repositories/1/test-executions) returned one failed and one passed execution for `controlled.ci / recovers on rerun` |
+| Flake score and dashboard | [Flake-scores API](https://repropulse.duckdns.org/api/v1/repositories/1/flake-scores) returned 2 completed attempts, 1 transient failure, 1 resolved commit, and 50%; the [dashboard](https://repropulse.duckdns.org/flake-scores?repositoryId=1) rendered the same test and 50% score |
+| Pull-request feedback | Pending fresh `synchronize` webhook on [PR #1](https://github.com/bolanosmanny/repropulse/pull/1) |
 
 ## Longitudinal CI evidence
 
