@@ -2,12 +2,15 @@ name: Controlled flake validation
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [edited]
 
 permissions:
   contents: read
 
 jobs:
   controlled-test:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.body, '[run-controlled-flake]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

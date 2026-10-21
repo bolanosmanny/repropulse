@@ -17,14 +17,14 @@ GitHub Actions currently lists [27 ReproPulse runs](https://github.com/bolanosma
 
 ## Controlled fail-then-pass validation
 
-The `Controlled flake validation` workflow is manually triggered. Its single test deliberately fails on GitHub run attempt 1 and passes on a rerun of the **same workflow run and commit**. It writes one JUnit case with `file="scripts/controlled-flake-test.mjs"`. The upload action sends both `github.run_id` and `github.run_attempt` to ReproPulse. The database stores the two attempts separately using the `(github_workflow_run_id, run_attempt)` key.
+The `Controlled flake validation` workflow has a manual trigger once its file is on the default branch. While it is only in the validation pull request, edit that PR's body to include `[run-controlled-flake]`; the workflow's `pull_request: edited` trigger runs only with that marker. Its single test deliberately fails on GitHub run attempt 1 and passes on a rerun of the **same workflow run and commit**. It writes one JUnit case with `file="scripts/controlled-flake-test.mjs"`. The upload action sends both `github.run_id` and `github.run_attempt` to ReproPulse. The database stores the two attempts separately using the `(github_workflow_run_id, run_attempt)` key.
 
 Run this only while the on-demand ReproPulse API and both workers are available:
 
-1. Dispatch `Controlled flake validation` on the validation branch. Confirm attempt 1 fails and its `Upload JUnit report` step succeeds.
+1. Add `[run-controlled-flake]` to the validation PR body, or dispatch the workflow after it is on the default branch. Confirm attempt 1 fails and its `Upload JUnit report` step succeeds.
 2. Rerun the failed job in GitHub Actions. Confirm attempt 2 passes and uploads its report. Verify both attempts show the same `head_sha` and workflow run ID.
 3. Query the repository's workflow runs, test history, flake scores, and reliability metrics. Expect two attempts, one failed and one passed execution for the controlled test, one rerun-resolved commit, and a 50% score.
-4. Open a pull request that changes `scripts/controlled-flake-test.mjs`. The GitHub App must be installed on this repository with PR feedback permissions. Confirm its comment names that exact file and test with a 50% score. Open the PR only after step 3 so its `opened` webhook evaluates the observed score.
+4. The validation PR already changes `scripts/controlled-flake-test.mjs`. After step 3, push a small follow-up commit to that PR to emit a `synchronize` webhook. The GitHub App must be installed on this repository with PR feedback permissions. Confirm its comment names that exact file and test with a 50% score.
 5. Record the GitHub run URL, PR URL, API responses, and dashboard screenshots below. Keep controlled results separate from naturally occurring flake counts.
 
 | Controlled evidence | Result |
