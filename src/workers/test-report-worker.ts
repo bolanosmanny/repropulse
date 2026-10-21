@@ -16,6 +16,7 @@ const worker = new Worker<ProcessTestReportJob>(
         logger.info(
             {
                 githubWorkflowRunId: job.data.githubWorkflowRunId,
+                runAttempt: job.data.runAttempt ?? 1,
             },
             "Processing test report"
         );
@@ -24,12 +25,14 @@ const worker = new Worker<ProcessTestReportJob>(
 
         const result = await storeTestReport(
             job.data.githubWorkflowRunId,
+            job.data.runAttempt ?? 1,
             parsedTests
         );
 
         logger.info(
             {
                 githubWorkflowRunId: job.data.githubWorkflowRunId,
+                runAttempt: job.data.runAttempt ?? 1,
                 storedTestCount: result.storedTestCount,
             },
             "Test report processed"

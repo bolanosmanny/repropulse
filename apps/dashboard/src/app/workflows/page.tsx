@@ -79,7 +79,7 @@ export default async function WorkflowsPage({
                                     const result = run.conclusion ?? run.status;
 
                                     return ( 
-                                        <tr key = {run.githubWorkflowRunId}>
+                                        <tr key = {`${run.githubWorkflowRunId}-${run.runAttempt}`}>
                                             <td className = "px-4 py-3 font-medium text-stone-900">
                                                 {run.workflowName}
                                             </td>

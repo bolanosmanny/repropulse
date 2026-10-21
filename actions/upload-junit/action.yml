@@ -6,7 +6,7 @@ inputs:
     description: Public base URL of the ReproPulse API
     required: true
   ingestion-token:
-    description: ReproPulse ingestion tokne
+    description: ReproPulse ingestion token
     required: true
   report-path:
     description: Path to the JUnit XML report
@@ -25,6 +25,7 @@ runs:
         REPROPULSE_INGESTION_TOKEN: ${{ inputs.ingestion-token }}
         REPROPULSE_REPORT_PATH: ${{ inputs.report-path }}
         REPROPULSE_WORKFLOW_RUN_ID: ${{ inputs.workflow-run-id }}
+        REPROPULSE_RUN_ATTEMPT: ${{ github.run_attempt }}
       run: | 
         set -euo pipefail
 
@@ -36,12 +37,15 @@ runs:
         upload_url="${REPROPULSE_ENDPOINT%/}/api/v1/test-reports"
 
         curl --fail-with-body --silent --show-error \
+          --connect-timeout 10 \
+          --max-time 60 \
           --retry 3 \
           --retry-all-errors \
           -X POST "$upload_url" \
           -H "Content-Type: application/xml" \
           -H "x-repropulse-token: $REPROPULSE_INGESTION_TOKEN" \
           -H "x-repropulse-workflow-run-id: $REPROPULSE_WORKFLOW_RUN_ID" \
+          -H "x-repropulse-run-attempt: $REPROPULSE_RUN_ATTEMPT" \
           --data-binary "@$REPROPULSE_REPORT_PATH"
 
         echo "JUnit report uploaded to ReproPulse."

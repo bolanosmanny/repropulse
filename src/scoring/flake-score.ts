@@ -1,6 +1,7 @@
 export type TestOutcome = "passed" | "failed" | "error" | "skipped";
 
 export type ScorableTestExecution = {
+    githubWorkflowRunId: number;
     headSha: string;
     runAttempt: number;
     outcome: TestOutcome;
@@ -24,22 +25,22 @@ function isCompletedAttempt(outcome: TestOutcome): boolean {
 export function calculateFlakeScore(
     executions: ScorableTestExecution[]
 ): FlakeScore {
-    const executionsByCommit = new Map<string, ScorableTestExecution[]>();
+    const executionsByRun = new Map<number, ScorableTestExecution[]>();
 
     for (const execution of executions) {
-        const commitExecutions =
-            executionsByCommit.get(execution.headSha) ?? [];
+        const runExecutions =
+            executionsByRun.get(execution.githubWorkflowRunId) ?? [];
 
-        commitExecutions.push(execution);
-        executionsByCommit.set(execution.headSha, commitExecutions);
+        runExecutions.push(execution);
+        executionsByRun.set(execution.githubWorkflowRunId, runExecutions);
     }
 
     let completedAttempts = 0;
     let transientFailures = 0;
-    let rerunResolvedCommits = 0;
+    const resolvedCommits = new Set<string>();
 
-    for (const commitExecutions of executionsByCommit.values()) {
-        const orderedExecutions = [...commitExecutions].sort(
+    for (const runExecutions of executionsByRun.values()) {
+        const orderedExecutions = [...runExecutions].sort(
             (left, right) => left.runAttempt - right.runAttempt
         );
 
@@ -47,33 +48,28 @@ export function calculateFlakeScore(
             isCompletedAttempt(execution.outcome)
         ).length;
 
-        let resolvedFailureExists = false;
-
-        for (const [index, execution] of orderedExecutions.entries()) {
+        for (const execution of orderedExecutions) {
 
             if (!isFailure(execution.outcome)) {
                 continue;
             }
 
-            const passesLaterOnSameCommit = orderedExecutions
-                .slice(index + 1)
-                .some((laterExecution) => laterExecution.outcome === "passed");
-
-            if (passesLaterOnSameCommit) {
+            if (orderedExecutions.some(
+                (laterExecution) =>
+                    laterExecution.outcome === "passed" &&
+                    laterExecution.headSha === execution.headSha &&
+                    laterExecution.runAttempt > execution.runAttempt
+            )) {
                 transientFailures += 1;
-                resolvedFailureExists = true;
+                resolvedCommits.add(execution.headSha);
             }
-        }
-
-        if (resolvedFailureExists) {
-            rerunResolvedCommits += 1;
         }
     }
 
     return {
         completedAttempts,
         transientFailures,
-        rerunResolvedCommits,
+        rerunResolvedCommits: resolvedCommits.size,
         scorePercent:
             completedAttempts === 0
                 ? 0

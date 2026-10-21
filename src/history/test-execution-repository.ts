@@ -35,7 +35,7 @@ export async function listTestExecutionsForRepository(
             durationMs: testExecutions.durationMs,
             failureType: testExecutions.failureType,
             failureMessage: testExecutions.failureMessage,
-            githubWorkflowRunId: workflowRuns.id,
+            githubWorkflowRunId: workflowRuns.githubWorkflowRunId,
             workflowName: workflowRuns.workflowName,
             headSha: workflowRuns.headSha,
             headBranch: workflowRuns.headBranch,

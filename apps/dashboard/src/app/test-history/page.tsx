@@ -131,7 +131,7 @@ export default async function TestHistoryPage({
 
                             <tbody className = "divide-y divide-stone-100">
                                 {executions.map((execution) => (
-                                    <tr key = {`${execution.githubWorkflowRunId}-${execution.testDefinitionId}`}>
+                                    <tr key = {`${execution.githubWorkflowRunId}-${execution.runAttempt}-${execution.testDefinitionId}`}>
                                         <td className = "px-4 py-3">
                                             <p className = "font-medium text-stone-900">
                                                 {execution.testName}
