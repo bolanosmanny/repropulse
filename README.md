@@ -128,6 +128,8 @@ The environment is intentionally run on demand to control cloud costs. During de
 
 A zero-flake snapshot means no retry-recovered failure had been observed at that time. It does not mean the system assumes a test suite can never be flaky.
 
+For the controlled rerun procedure, current evidence limits, and longitudinal study plan, see the [validation record](docs/validation.md).
+
 ## Run locally
 
 ### Prerequisites

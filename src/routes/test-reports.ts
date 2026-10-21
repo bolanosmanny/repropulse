@@ -6,6 +6,7 @@ type TestReportUploadedRequest = {
   Headers: {
     "x-repropulse-token": string;
     "x-repropulse-workflow-run-id": string;
+    "x-repropulse-run-attempt"?: string;
   };
   Body: string;
 };
@@ -31,6 +32,10 @@ export const testReportRoutes: FastifyPluginAsync = async (app) => {
               type: "string",
               description: "GitHub Actions workflow run ID.",
             },
+            "x-repropulse-run-attempt": {
+              type: "string",
+              description: "GitHub Actions run attempt (defaults to 1 for older clients).",
+            },
           },
           required: [
             "x-repropulse-token",
@@ -49,6 +54,9 @@ export const testReportRoutes: FastifyPluginAsync = async (app) => {
       const githubWorkflowRunId = Number(
         request.headers["x-repropulse-workflow-run-id"]
       );
+      const runAttempt = Number(
+        request.headers["x-repropulse-run-attempt"] ?? "1"
+      );
 
       if (
         !Number.isSafeInteger(githubWorkflowRunId) ||
@@ -56,6 +64,12 @@ export const testReportRoutes: FastifyPluginAsync = async (app) => {
       ) {
         return reply.code(400).send({
           error: "Invalid workflow run ID",
+        });
+      }
+
+      if (!Number.isSafeInteger(runAttempt) || runAttempt < 1) {
+        return reply.code(400).send({
+          error: "Invalid workflow run attempt",
         });
       }
 
@@ -69,6 +83,7 @@ export const testReportRoutes: FastifyPluginAsync = async (app) => {
         "process-test-report",
         {
           githubWorkflowRunId,
+          runAttempt,
           xml: request.body,
         },
         {
@@ -85,6 +100,7 @@ export const testReportRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(202).send({
         accepted: true,
         githubWorkflowRunId,
+        runAttempt,
       });
     }
   );

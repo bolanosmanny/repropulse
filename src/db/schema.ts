@@ -87,8 +87,7 @@ export const workflowRuns = pgTable(
         githubWorkflowRunId: bigint("github_workflow_run_id", {
             mode: "number",
         })
-            .notNull()
-            .unique(),
+            .notNull(),
         repositoryId: integer("repository_id")
             .notNull()
             .references(() => repositories.id),
@@ -108,6 +107,10 @@ export const workflowRuns = pgTable(
             .defaultNow(),
     },
     (table) => [
+        uniqueIndex("workflow_runs_run_attempt_unique").on(
+            table.githubWorkflowRunId,
+            table.runAttempt
+        ),
         index("workflow_runs_repository_id_idx").on(table.repositoryId),
         index("workflow_runs_head_sha_idx").on(table.headSha),
         index("workflow_runs_conclusion_idx").on(table.conclusion),

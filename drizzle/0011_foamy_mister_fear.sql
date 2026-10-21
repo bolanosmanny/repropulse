@@ -1,0 +1,2 @@
+ALTER TABLE "workflow_runs" DROP CONSTRAINT "workflow_runs_github_workflow_run_id_unique";--> statement-breakpoint
+CREATE UNIQUE INDEX "workflow_runs_run_attempt_unique" ON "workflow_runs" USING btree ("github_workflow_run_id","run_attempt");

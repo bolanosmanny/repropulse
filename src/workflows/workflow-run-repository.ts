@@ -46,7 +46,7 @@ export async function upsertWorkflowRun(
             completedAt: new Date(workflowRun.updated_at),
         })
         .onConflictDoUpdate({
-            target: workflowRuns.githubWorkflowRunId,
+            target: [workflowRuns.githubWorkflowRunId, workflowRuns.runAttempt],
             set: { 
                 workflowName: workflowRun.name,
                 status: workflowRun.status,

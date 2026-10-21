@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { 
     testDefinitions,
@@ -9,6 +9,7 @@ import type { ParsedJUnitTest } from "../ingestion/junit-parser.js";
 
 export async function storeTestReport(
     githubWorkflowRunId: number,
+    runAttempt: number,
     parsedTests: ParsedJUnitTest[]
 ): Promise<{ storedTestCount: number }> { 
     const [workflowRun] = await db
@@ -18,13 +19,16 @@ export async function storeTestReport(
         })
         .from(workflowRuns)
         .where(
-            eq(workflowRuns.githubWorkflowRunId, githubWorkflowRunId)
+            and(
+                eq(workflowRuns.githubWorkflowRunId, githubWorkflowRunId),
+                eq(workflowRuns.runAttempt, runAttempt)
+            )
         )
         .limit(1);
 
     if (workflowRun == null) { 
         throw new Error(
-            `Workflow run ${githubWorkflowRunId} was not found`
+            `Workflow run ${githubWorkflowRunId} attempt ${runAttempt} was not found`
         );
     }
 

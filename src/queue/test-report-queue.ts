@@ -3,6 +3,7 @@ import { redisConnection } from './redis-connection.js';
 
 export type ProcessTestReportJob = { 
     githubWorkflowRunId: number;
+    runAttempt: number;
     xml: string;
 };
 

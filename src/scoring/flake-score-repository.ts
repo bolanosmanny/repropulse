@@ -43,6 +43,7 @@ export async function getFlakeScoresForRepository(
             className: testDefinitions.className,
             testName: testDefinitions.testName,
             sourceFile: testDefinitions.sourceFile,
+            githubWorkflowRunId: workflowRuns.githubWorkflowRunId,
             headSha: workflowRuns.headSha,
             runAttempt: workflowRuns.runAttempt,
             outcome: testExecutions.outcome,
@@ -66,6 +67,7 @@ export async function getFlakeScoresForRepository(
             testName: string;
             sourceFile: string | null;
             executions: {
+                githubWorkflowRunId: number;
                 headSha: string;
                 runAttempt: number;
                 outcome: TestOutcome;
@@ -84,6 +86,7 @@ export async function getFlakeScoresForRepository(
                 sourceFile: row.sourceFile,
                 executions: [
                     {
+                        githubWorkflowRunId: row.githubWorkflowRunId,
                         headSha: row.headSha,
                         runAttempt: row.runAttempt,
                         outcome: toTestOutcome(row.outcome),
@@ -95,6 +98,7 @@ export async function getFlakeScoresForRepository(
         }
 
         existingTest.executions.push({
+            githubWorkflowRunId: row.githubWorkflowRunId,
             headSha: row.headSha,
             runAttempt: row.runAttempt,
             outcome: toTestOutcome(row.outcome),

@@ -1,0 +1,25 @@
+name: Controlled flake validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controlled-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run controlled test and write JUnit report
+        run: node scripts/controlled-flake-test.mjs
+
+      - name: Upload JUnit report to ReproPulse
+        if: always() && vars.REPROPULSE_ENDPOINT != ''
+        uses: ./actions/upload-junit
+        with:
+          endpoint: ${{ vars.REPROPULSE_ENDPOINT }}
+          ingestion-token: ${{ secrets.REPROPULSE_INGESTION_TOKEN }}
+          report-path: reports/controlled-flake.xml
+          workflow-run-id: ${{ github.run_id }}
