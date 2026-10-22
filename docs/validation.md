@@ -38,7 +38,11 @@ Run this only while the on-demand ReproPulse API and both workers are available:
 
 ## Longitudinal CI evidence
 
-Collect a window of at least three weeks **after** continuous ingestion is enabled. For every included repository, record its first and last processed run dates, workflow attempt count, test execution count, and distinct test definitions. Review every alert against its paired failed and passed executions on the same commit. Count confirmed natural flakes and false alerts separately; exclude the controlled case above. If the demo server is turned off during the window, report the gap and start a new continuous window.
+The CI workflows now preserve JUnit artifacts for 30 days even when the EC2 demo server is off. They can be imported later using the procedure in the README. This permits a **historical CI evidence window**, but not a claim of continuous webhook monitoring: missing webhooks, PR feedback, and webhook latency cannot be reconstructed from JUnit XML. Check the artifact retention date before planning a three-week window.
+
+The first archive-enabled [CI run 39705700296](https://github.com/bolanosmanny/repropulse/actions/runs/39705700296) completed successfully on October 21–22, 2026. Its test step and `Preserve JUnit report` step passed, and GitHub listed artifact `repropulse-junit-39705700296-1` with expiry November 21, 2026. The live upload step was intentionally skipped because `REPROPULSE_LIVE` was not enabled. This proves artifact preservation, **not** database backfill or flake detection.
+
+For every included repository, record the first and last GitHub run dates, imported workflow attempt count, test execution count, and distinct test definitions. Review every candidate flake against paired failed and passed executions on the same commit. Count confirmed natural flakes and false alerts separately; exclude the controlled case above. Report which runs were live-ingested and which were backfilled. If the demo server is off, do not report the intervening period as continuous live ingestion.
 
 ## Investigation-time study
 

@@ -1,0 +1,38 @@
+name: Controlled triage study
+
+on:
+  pull_request:
+    types: [edited]
+
+permissions:
+  contents: read
+
+jobs:
+  controlled-case:
+    if: startsWith(github.event.pull_request.body, '[triage-case:')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run one controlled case and write JUnit
+        env:
+          TRIAGE_CASE_MARKER: ${{ github.event.pull_request.body }}
+        run: node scripts/triage-study-case.mjs
+
+      - name: Preserve JUnit report while demo server is offline
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repropulse-junit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/triage-study.xml
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload JUnit report to ReproPulse
+        if: always() && vars.REPROPULSE_LIVE == 'true' && vars.REPROPULSE_ENDPOINT != ''
+        uses: ./actions/upload-junit
+        with:
+          endpoint: ${{ vars.REPROPULSE_ENDPOINT }}
+          ingestion-token: ${{ secrets.REPROPULSE_INGESTION_TOKEN }}
+          report-path: reports/triage-study.xml
+          workflow-run-id: ${{ github.run_id }}
