@@ -9,6 +9,8 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "archive:import": "tsx src/scripts/import-junit-archive.ts",
+    "archive:import:prod": "node dist/scripts/import-junit-archive.js",
     "worker:dev": "tsx watch src/workers/webhook-delivery-worker.ts",
     "worker:test-reports": "tsx watch src/workers/test-report-worker.ts",
     "build": "tsc",

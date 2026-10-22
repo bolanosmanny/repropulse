@@ -19,7 +19,9 @@ export async function upsertWorkflowRun(
             target: repositories.githubRepositoryId,
             set: { 
                 fullName: repository.full_name,
-                defaultBranch: repository.default_branch,
+                ...(repository.default_branch == null
+                    ? {}
+                    : { defaultBranch: repository.default_branch }),
                 updatedAt: new Date(),
             },
         })

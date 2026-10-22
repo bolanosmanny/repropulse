@@ -215,8 +215,16 @@ actions/upload-junit
 Example workflow step:
 
 ```yaml
+- name: Preserve JUnit for later import
+  if: always()
+  uses: actions/upload-artifact@v4
+  with:
+    name: repropulse-junit-${{ github.run_id }}-${{ github.run_attempt }}
+    path: reports/junit.xml
+    retention-days: 30
+
 - name: Upload JUnit report to ReproPulse
-  if: always() && vars.REPROPULSE_ENDPOINT != ''
+  if: always() && vars.REPROPULSE_LIVE == 'true' && vars.REPROPULSE_ENDPOINT != ''
   uses: ./actions/upload-junit
   with:
     endpoint: ${{ vars.REPROPULSE_ENDPOINT }}
@@ -225,7 +233,21 @@ Example workflow step:
     workflow-run-id: ${{ github.run_id }}
 ```
 
-Store `REPROPULSE_ENDPOINT` as a GitHub Actions variable and `REPROPULSE_INGESTION_TOKEN` as a GitHub Actions secret.
+Store `REPROPULSE_ENDPOINT` as a GitHub Actions variable and `REPROPULSE_INGESTION_TOKEN` as a GitHub Actions secret. Set the `REPROPULSE_LIVE` variable to `true` only while the demo server is online. The workflows in this repository preserve JUnit artifacts even when live upload is disabled. GitHub retains these artifacts for 30 days as configured in the workflow; download them before expiry. Do not put secrets in JUnit failure output.
+
+### Backfill an offline report
+
+1. Download and extract a `repropulse-junit-RUN_ID-ATTEMPT` artifact from its GitHub Actions run. Keep the XML unmodified and record the repository, run ID, and attempt from GitHub.
+2. When PostgreSQL is available, run the importer from the repository root (or from the deployed API image with the extracted report mounted read-only):
+
+```bash
+npm run archive:import -- --repository bolanosmanny/stratos --run-id 123456 --attempt 1 --report /absolute/path/to/junit.xml --dry-run
+npm run archive:import -- --repository bolanosmanny/stratos --run-id 123456 --attempt 1 --report /absolute/path/to/junit.xml
+```
+
+The importer retrieves the completed run attempt from GitHub's API, validates its repository/ID/attempt, then uses the existing idempotent database upserts for the workflow run and test results. Public repositories can be read without a token; for private repositories or API rate limits, provide `GITHUB_TOKEN` through the environment, not the command line. The dry run checks the report and GitHub metadata without writing to PostgreSQL. Re-importing the same attempt replaces its test outcomes rather than double-counting them.
+
+This is **historical backfill**, not continuous webhook delivery. GitHub does not automatically redeliver failed webhooks; offline deliveries and live PR feedback are not recovered by importing XML. Webhook success/latency metrics describe only deliveries actually received while the server ran. Do not call archived runs "live processed" or claim several weeks of continuous monitoring just because artifacts were later imported.
 
 ## Future improvements
 
