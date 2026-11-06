@@ -122,6 +122,7 @@ The environment is intentionally run on demand to control cloud costs. During de
 | Connected repositories | 2 |
 | Workflow runs ingested | 3 |
 | JUnit test executions stored | 51 |
+| Signed webhook deliveries processed | 12 |
 | Webhook processing success rate | 100% |
 | p95 webhook processing latency | 112.5 ms |
 | Retry-recovered failures observed | 0 at snapshot |
