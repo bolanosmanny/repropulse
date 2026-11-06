@@ -122,9 +122,12 @@ The environment is intentionally run on demand to control cloud costs. During de
 | Connected repositories | 2 |
 | Workflow runs ingested | 3 |
 | JUnit test executions stored | 51 |
+| Signed webhook deliveries processed | 12 |
 | Webhook processing success rate | 100% |
 | p95 webhook processing latency | 112.5 ms |
 | Retry-recovered failures observed | 0 at snapshot |
+
+The webhook success rate and p95 latency describe those 12 processed deliveries, not continuous uptime or end-to-end dashboard latency. These figures are a point-in-time deployment check, not a long-term reliability claim.
 
 A zero-flake snapshot means no retry-recovered failure had been observed at that time. It does not mean the system assumes a test suite can never be flaky.
 
